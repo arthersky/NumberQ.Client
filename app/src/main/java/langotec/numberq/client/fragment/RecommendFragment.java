@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.Store;
 import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.adapter.MainSliderAdapter;
@@ -42,20 +43,18 @@ public class RecommendFragment extends Fragment {
     Context context = null;
 
     public RecommendFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        storeList = (ArrayList<Store>) getArguments().getSerializable("storeList");
+//        storeList = (ArrayList<Store>) getArguments().getSerializable("storeList");
+        storeList = MainActivity.storeList;
         Log.e("datafrg",""+storeList.get(1).getHeadName());
         context = getActivity().getApplicationContext(); //android.app.Application@ce249d0
         View view = inflater.inflate(R.layout.fragment_recommend, container, false);

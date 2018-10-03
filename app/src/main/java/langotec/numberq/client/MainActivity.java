@@ -1,6 +1,5 @@
 package langotec.numberq.client;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     double lng = 0.0;
 
     //store array
-    private ArrayList<Store> storeList;
+    public static ArrayList<Store> storeList;
 
     //title Array
     private String[] titles;
@@ -172,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
         cartFragment =new CartFragment();
         moreFragment = new MoreFragment();
 
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("storeList",storeList);
-        recommendFragment.setArguments(bundle);
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("storeList",storeList);
+//        recommendFragment.setArguments(bundle);
 
         adapter.addFragment(recommendFragment);
         adapter.addFragment(orderFragment);

@@ -26,9 +26,10 @@ public class Menu implements Serializable{
 	private boolean available;
 	private final short MAXQUANTITY = 200; //最大單筆菜單可加入購物車數量
 
-	public Menu(String headName, String HeadId, String productId, String productType,
+	public Menu(String headName, String branchName, String HeadId, String productId, String productType,
 				String productName, String price, String image, boolean available, String desc) {
 		setHeadName(headName);
+		setBranchName(branchName);
 		setHeadId(HeadId);
 		setProductId(productId);
 		setType(productType);
