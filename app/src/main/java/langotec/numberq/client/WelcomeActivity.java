@@ -61,38 +61,39 @@ public class WelcomeActivity extends AppCompatActivity{
         if (isFirst) {
             new OkHttpHandler().execute(MENU_SERVER);
 //        new OkHttpHandler().execute(STORE_SERVER);
-
-            //Location
-            // 取得定位服務的LocationManager物件
-            lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-            // 檢查是否有啟用GPS
-            if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                // 顯示對話方塊啟用GPS
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.locationManager)
-                        .setMessage(R.string.locationMessage)
-                        .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // 使用Intent物件啟動設定程式來更改GPS設定
-                                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(i);
-                            }
-                        })
-                        .setNegativeButton(R.string.setNegativeButton, null).create().show();
-            }
-            //檢查版本和權限
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            }
-            //DBConn
-            if(handler == null) handler = new MyHandler();
-            search = new StoreDBConn();
-            search.query(handler, getFilesDir(), lat,lng);
-
         }
+        //Location
+        // 取得定位服務的LocationManager物件
+        lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // 檢查是否有啟用GPS
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            // 顯示對話方塊啟用GPS
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.locationManager)
+                    .setMessage(R.string.locationMessage)
+                    .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // 使用Intent物件啟動設定程式來更改GPS設定
+                            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(i);
+                        }
+                    })
+                    .setNegativeButton(R.string.setNegativeButton, null).create().show();
+        }
+        //檢查版本和權限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+        //DBConn
+        currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        lat = currentLocation.getLatitude();
+        lng = currentLocation.getLongitude();
+        if(handler == null) handler = new MyHandler();
+        search = new StoreDBConn();
+        search.query(handler, getFilesDir(), lat,lng);
     }
 
     @Override
@@ -233,15 +234,6 @@ public class WelcomeActivity extends AppCompatActivity{
         @Override
         protected void onPostExecute(Void v) {
             super.onPostExecute(v);
-            if (!qResult.equals("no record")) {
-                startActivity(new Intent()
-                        .setClass(getApplicationContext(), MainActivity.class)
-                .putExtra());
-                finish();
-            }else{
-                showDialog();
-            }
-
         }
     }
 
@@ -255,38 +247,35 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("storeSearch isOk", String.valueOf(isOk));
             if(isConn){ // 網路已開啟
                 if(isOk) {
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//                    builder.setTitle("搜尋")
-//                            .setMessage("搜尋成功!")
-//                            .setPositiveButton("確定", null)
-//                            .create().show();
                     storeList = search.getData();
                     Log.e("store1", storeList.get(1).getBranchName());
+                    if (!qResult.equals("no record")) {
+                        startActivity(new Intent()
+                                .setClass(getApplicationContext(), MainActivity.class)
+                                /*.putExtras(data)*/.putExtra("storeList",storeList));
+                        finish();
+                    }else{
+                        showDialog();
+                    }
                 }else{
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//                    builder.setTitle("搜尋")
-//                            .setMessage("無資料!")
-//                            .setPositiveButton("確定", null)
-//                            .create().show();
                     Log.e("DBConn","No Data");
                 }
             }else{
                 // 連線失敗,未開啟網路
-//                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//                builder.setTitle("登入")
-//                        .setIcon(android.R.drawable.ic_dialog_info)
-//                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
-//                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                dialogInterface.dismiss();
-//                            }
-//                        })
-//                        .create().show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("登入")
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .create().show();
                 Log.e("DBConn","No Internet");
             }
         }
     }
-
 
 }

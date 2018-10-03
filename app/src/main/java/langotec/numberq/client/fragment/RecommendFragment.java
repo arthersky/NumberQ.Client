@@ -4,6 +4,7 @@ package langotec.numberq.client.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import langotec.numberq.client.Store;
 import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.adapter.MainSliderAdapter;
 import langotec.numberq.client.adapter.RecyclerViewAdapter;
@@ -25,6 +27,9 @@ import langotec.numberq.client.map.Activity_GoogleMap;
 import ss.com.bannerslider.Slider;
 
 public class RecommendFragment extends Fragment {
+
+    //store array
+    private ArrayList<Store> storeList;
 
     private FloatingActionButton fb;
 
@@ -41,9 +46,17 @@ public class RecommendFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        storeList = (ArrayList<Store>) getArguments().getSerializable("storeList");
+        Log.e("datafrg",""+storeList.get(1).getHeadName());
         context = getActivity().getApplicationContext(); //android.app.Application@ce249d0
         View view = inflater.inflate(R.layout.fragment_recommend, container, false);
 
@@ -63,14 +76,20 @@ public class RecommendFragment extends Fragment {
         // 選擇一種Layout管理器這邊是選擇（linear layout manager）
         mLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        String[] mDataset = context.getResources().getStringArray(R.array.store);
-        ArrayList myDataset = new ArrayList();
-        for (int i = 0; i < mDataset.length; i++){
-            myDataset.add(mDataset[i]);
-        }
+//        String[] mDataset = context.getResources().getStringArray(R.array.store);
+//        String[] storeHeadName = new String[storeList.size()];
+//        for (int i=0;i<storeList.size();i++){
+//            String storeName = storeList.get(i).getHeadName();
+//            storeHeadName[i] = storeName;
+//        }
+//        ArrayList myDataset = new ArrayList();
+//        for (int i = 0; i < storeHeadName.length; i++){
+//            myDataset.add(storeHeadName[i]);
+//        }
 
         // 設定適配器
-        mAdapter = new RecyclerViewAdapter(myDataset);
+//        mAdapter = new RecyclerViewAdapter(myDataset);
+        mAdapter = new RecyclerViewAdapter(storeList);
         mRecyclerView.setAdapter(mAdapter);
 
         //Initializing floating button

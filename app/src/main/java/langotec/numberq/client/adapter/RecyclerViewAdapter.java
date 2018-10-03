@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
+import langotec.numberq.client.Store;
 import langotec.numberq.client.dbConnect.MenuDBConn;
 import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.menu.Menu;
@@ -35,7 +36,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = null;
-        if (data.get(0) instanceof String) {
+        if (data.get(0) instanceof Store) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(
                     R.layout.cardview_store, viewGroup, false);
 
@@ -53,28 +54,38 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View view = viewHolder.view;
         context = view.getContext();
 
-        if (data.get(0) instanceof String) {
-            final String data = (String) this.data.get(position);
+        if (data.get(0) instanceof Store) {
+//            final String data = (String) this.data.get(position);
+            Store store = (Store) data.get(position);
+//            ArrayList StoreList = ;
             TextView textStoreName = (TextView) view.findViewById(R.id.textView1);
+            TextView textBranchName = (TextView) view.findViewById(R.id.textView2);
             ImageView storeIconImage = (ImageView) view.findViewById(R.id.store_icon);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new MenuDBConn(data, context).execute();
+                    new MenuDBConn(((Store) data.get(0)).getBranchName(), context).execute();
 //                    Intent intent = new Intent(v.getContext(), MenuActivity.class);
 //                    context.startActivity(intent);
                 }
             });
 
-            if (position % 2 == 0) {
-                textStoreName.setTextColor(0xFF000000);
-                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
-            } else {
-                textStoreName.setTextColor(0xFFAAAAAA);
+//            if (position % 2 == 0) {
+//                textStoreName.setTextColor(0xFF000000);
+//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
+//            } else {
+//                textStoreName.setTextColor(0xFFAAAAAA);
+//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
+//            }
+//            textStoreName.setText(data);
+            if (store.getHeadName().equals("八方雲集")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
+            }else if (store.getHeadName().equals("鼎泰豐")){
+                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
             }
-            textStoreName.setText(data);
+            textStoreName.setText(store.getHeadName());
+            textBranchName.setText(store.getBranchName());
         }
 
         else if (data.get(position) instanceof Menu){
