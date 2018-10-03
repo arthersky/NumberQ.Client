@@ -1,5 +1,6 @@
 package langotec.numberq.client.dbConnect;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,7 +29,7 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String storeName;
     private ShowDialog showDialog;
     private WeakReference<Context> activityReference;
-    private ArrayList<Menu> menuList = new ArrayList<>();
+    private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
 
     public MenuDBConn(String storeName, Context context) {

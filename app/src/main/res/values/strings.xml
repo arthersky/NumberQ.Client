@@ -4,7 +4,7 @@
     <string name="tab1">RECOMMEND</string>
     <string name="tab2">ORDER</string>
     <string name="tab3">CART</string>
-    <string name="tab4">MORE</string>
+    <string name="tab4">PLEASE LOGIN</string>
 
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="dummy_button">Dummy Button</string>

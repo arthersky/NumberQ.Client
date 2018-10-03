@@ -1,19 +1,9 @@
 package langotec.numberq.client;
 
-import android.Manifest;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import langotec.numberq.client.adapter.BottomNavigationViewHelper;
 import langotec.numberq.client.adapter.ViewPagerAdapter;
 import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.fragment.MoreFragment;
@@ -31,11 +22,6 @@ import langotec.numberq.client.fragment.RecommendFragment;
 public class MainActivity extends AppCompatActivity {
     //title Array
     private String[] titles;
-    //Location
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 101;
-    public static LocationManager lm;
-    public static Location currentLocation = null;
-    public static LocationListener ll;
 
     //BottomNavigationView
     private BottomNavigationView bottomNavigationView;
@@ -57,31 +43,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Location
-        // 取得定位服務的LocationManager物件
-        lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        // 檢查是否有啟用GPS
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // 顯示對話方塊啟用GPS
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.locationManager)
-                    .setMessage(R.string.locationMessage)
-                    .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // 使用Intent物件啟動設定程式來更改GPS設定
-                            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(i);
-                        }
-                    })
-                    .setNegativeButton(R.string.setNegativeButton, null).create().show();
-        }
-        //檢查版本和權限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
 
         //Initializing the bottomNavigationView
         bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
@@ -163,77 +124,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        ll = new MyLocationListener();
-        int minTime = 1000; // 毫秒
-        float minDistance = 1; // 公尺
-        try {  // 註冊更新的傾聽者物件
-            lm.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    minTime, minDistance, ll);
-            lm.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    minTime, minDistance, ll);
-        }
-        catch(SecurityException sex) {
-            Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
-            Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        try {  // 取消註冊更新的傾聽者物件
-            lm.removeUpdates(ll);
-        }
-        catch(SecurityException sex) {
-            Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
-            Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    class MyLocationListener implements LocationListener {
-        public void onLocationChanged(Location current) {
-            double lat, lng;
-            if (current != null) {
-                currentLocation = current;
-                // 取得經緯度
-                lat = current.getLatitude();
-                lng = current.getLongitude();
-                Toast.makeText(MainActivity.this, "經緯度座標變更....", Toast.LENGTH_SHORT).show();
-                Log.e("GPS","緯度: " + lat + " 經度: " + lng);
-            }
-        }
-        public void onProviderDisabled(String provider) {}
-        public void onProviderEnabled(String provider) {}
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 已經取得權限
-                Toast.makeText(this, "取得權限取得GPS資訊",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "直到取得權限, 否則無法取得GPS資訊",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
         recommendFragment =new RecommendFragment();
         orderFragment =new OrderFragment();
         cartFragment =new CartFragment();
         moreFragment = new MoreFragment();
+
         adapter.addFragment(recommendFragment);
         adapter.addFragment(orderFragment);
         adapter.addFragment(cartFragment);
         adapter.addFragment(moreFragment);
+
         viewPager.setAdapter(adapter);
     }
 
