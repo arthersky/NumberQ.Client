@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="langotec.numberq.client">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-sdk
+        tools:overrideLibrary="android.support.customtabs"
+        android:minSdkVersion="15"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/web_hi_res_512"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".WelcomeActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".login.LoginActivity"></activity>
+        <activity android:name=".login.AccInfoActivity"></activity>
+        <activity android:name=".login.AccRegiActivity"></activity>
+        <activity android:name=".login.SendPassActivity"></activity>
+        <activity android:name=".menu.MenuActivity"></activity>
+        <activity android:name=".menu.SelectedActivity"></activity>
+        <activity android:name=".menu.CheckOutActivity"></activity>
+        <activity
+            android:name="langotec.numberq.client.map.Activity_GoogleMap"
+            android:label="@string/title_activity_googlemap"
+            android:theme="@style/MyActionBar">
+        </activity>
+
+        <activity
+            android:name="map.Activity_PaySelect"
+            android:label="@string/title_activity_pay_select"
+            android:theme="@style/MyActionBar">
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyCve1n6aIbHcQNqTG3fMFuYaPyDmApwNyM"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+
+    </application>
+
+</manifest>

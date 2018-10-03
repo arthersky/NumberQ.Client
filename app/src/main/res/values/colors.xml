@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#354355</color>
+    <color name="colorPrimaryDark">#26303D</color>
+    <!--<color name="colorAccent">#F3CD70</color>-->
+    <color name="colorBackground">#FFFFFF</color>
+    <color name="colorTextPrimary">#FFFFFF</color>
+
+    <color name="tab_disable">#979797</color>
+    <color name="tab_enable">#FFFFFF</color>
+    <color name="tab_checked">#F3CD70</color>
+    <color name="tab_unchecked">#FFFFFF</color>
+
+    <color name="QPrimary">#FFA726</color>
+    <color name="QPrimary900">#E65100</color>
+    <color name="QPrimary800">#EF6C00</color>
+    <color name="QPrimary700">#F57C00</color>
+    <color name="QPrimary600">#FB8C00</color>
+    <color name="QPrimary500">#FF9800</color>
+    <color name="QPrimary400">#ffa726</color>
+    <color name="QPrimary300">#FFB74D</color>
+    <color name="QPrimary200">#FFCC80</color>
+    <color name="QPrimary100">#FFE0B2</color>
+    <color name="QPrimary50">#FFF3E0</color>
+    <color name="QTextOnPrimaryM">#F5F5F5</color>
+    <color name="QSecondary">#E04475</color>
+    <color name="QSecondary900">#7B1849</color>
+    <color name="QSecondary800">#A02052</color>
+    <color name="QSecondary700">#B52357</color>
+    <color name="QSecondary600">#CA275C</color>
+    <color name="QSecondary500">#DB2A5F</color>
+    <color name="QSecondary400">#E04475</color>
+    <color name="QSecondary300">#E6638D</color>
+    <color name="QSecondary200">#ED8FAD</color>
+    <color name="QSecondary100">#F4BACE</color>
+    <color name="QSecondary50">#FAE4EB</color>
+    <color name="QSurface">#FFFFFF</color>
+    <color name="QDark">#F5F5F5</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="colorAccent">#ff4081</color>
+</resources>

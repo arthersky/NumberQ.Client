@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">號碼牌</string>
+    <string name="tab1">推薦</string>
+    <string name="tab2">訂單</string>
+    <string name="tab3">購物車</string>
+    <string name="tab4">更多</string>
+    <string name="title_activity_welcome">歡迎使用NumberQ</string>
+    <string name="search">搜尋</string>
+    <string name="store_name">商店名</string>
+    <string name="branch">分店名</string>
+    <string name="now">現在</string>
+    <string name="wait_number">23</string>
+    <string name="about">號 大約</string>
+    <string name="minute_number">60</string>
+    <string name="minute">分鐘</string>
+    <string name="introduction">商店簡介</string>
+    <string name="add_record">新增</string>
+    <string name="update_record">更新</string>
+    <string name="delete_record">刪除</string>
+    <string name="refresh_record">刷新</string>
+</resources>
