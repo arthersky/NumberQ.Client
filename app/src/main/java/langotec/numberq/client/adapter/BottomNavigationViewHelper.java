@@ -1,5 +1,6 @@
 package langotec.numberq.client;
 
+import android.annotation.SuppressLint;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
@@ -9,6 +10,7 @@ import java.lang.reflect.Field;
 
 class BottomNavigationViewHelper {
 
+    @SuppressLint("RestrictedApi")
     static void removeShiftMode(BottomNavigationView view) {
         BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
         try {
