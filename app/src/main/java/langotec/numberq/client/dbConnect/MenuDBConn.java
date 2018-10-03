@@ -12,10 +12,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import langotec.numberq.client.WelcomeActivity;
+import langotec.numberq.client.menu.Cart;
 import langotec.numberq.client.menu.Menu;
 import langotec.numberq.client.menu.MenuActivity;
 import okhttp3.Call;
@@ -26,14 +30,23 @@ import okhttp3.Response;
 
 public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String qResult = "no record";
-    private String storeName;
-    private WeakReference<Context> activityReference;
+    private static String storeName;
+    private static WeakReference<Context> activityReference;
     private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
+    private volatile static MenuDBConn singletonMenuConn = new MenuDBConn();
+    private MenuDBConn(){}
 
-    public MenuDBConn(String storeName, Context context) {
-        this.storeName = storeName;
-        activityReference = new WeakReference<>(context);
+    public static MenuDBConn getInstance(String storeName, Context context){
+        MenuDBConn.storeName = storeName;
+        MenuDBConn.activityReference = new WeakReference<>(context);
+        if (singletonMenuConn == null) {
+            synchronized (MenuDBConn.class) {
+                if (singletonMenuConn == null)
+                    singletonMenuConn = new MenuDBConn();
+            }
+        }
+        return singletonMenuConn;
     }
 
     //  region AsyncTask Overrides

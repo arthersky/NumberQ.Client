@@ -61,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new MenuDBConn(data, context).execute();
+                    MenuDBConn.getInstance(data, context).execute();
 //                    Intent intent = new Intent(v.getContext(), MenuActivity.class);
 //                    context.startActivity(intent);
                 }
