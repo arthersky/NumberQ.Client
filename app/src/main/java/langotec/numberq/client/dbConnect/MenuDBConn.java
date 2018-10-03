@@ -1,6 +1,5 @@
 package langotec.numberq.client.dbConnect;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,9 +14,9 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.menu.Menu;
 import langotec.numberq.client.menu.MenuActivity;
+import langotec.numberq.client.menu.ShowDialog;
 import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -27,8 +26,9 @@ import okhttp3.Response;
 public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String qResult = "no record";
     private String storeName;
+    private ShowDialog showDialog;
     private WeakReference<Context> activityReference;
-    private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
+    private ArrayList<Menu> menuList = new ArrayList<>();
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
 
     public MenuDBConn(String storeName, Context context) {
@@ -41,10 +41,7 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         Context context = activityReference.get();
-        Intent intent = new Intent();
-        intent.putExtra("isFirst", false);
-        intent.setClass(context, WelcomeActivity.class);
-        context.startActivity(intent);
+        showDialog = new ShowDialog(context, this);
     }
 
     @Override
@@ -96,13 +93,13 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void v) {
         super.onPostExecute(v);
         Context context = activityReference.get();
+        showDialog.dismiss();
         if (!qResult.equals("no record")) {
             Intent intent = new Intent();
             intent.putExtra("menuList", parseJSON());
             intent.setClass(context, MenuActivity.class);
             context.startActivity(intent);
-        } else {
-            ((Activity)WelcomeActivity.context).finish();
+        } else if (qResult.equals("no record")) {
             showDialog();
         }
     }

@@ -23,7 +23,7 @@ public class WelcomeActivity extends AppCompatActivity{
             "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
     private static final String STORE_SERVER =
             "https://flashmage.000webhostapp.com/query.php?p=pass&w=storeList&n=10";
-    public static Context context;
+    private Context context;
     boolean isFirst;
     private String qResult = "no record";
 
@@ -36,7 +36,6 @@ public class WelcomeActivity extends AppCompatActivity{
         isFirst = getIntent().getBooleanExtra("isFirst", isFirst);
         if (isFirst) {
             new OkHttpHandler().execute(MENU_SERVER);
-//        new OkHttpHandler().execute(STORE_SERVER);
         }
     }
 
@@ -49,6 +48,7 @@ public class WelcomeActivity extends AppCompatActivity{
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("提醒訊息")
+                .setCancelable(false)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setMessage("目前無法連線，請檢查您的網路設定，謝謝您")
                 .setPositiveButton("確定", new DialogInterface.OnClickListener() {

@@ -97,7 +97,6 @@
     <string name="checkOut_use">使用</string>
     <string name="checkOut_check">結帳</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dialog_loading">Loading</string>
 
 </resources>
