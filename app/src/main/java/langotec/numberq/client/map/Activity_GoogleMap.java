@@ -57,6 +57,7 @@ import java.util.Locale;
 
 import langotec.numberq.client.R;
 import langotec.numberq.client.MainActivity;
+import langotec.numberq.client.WelcomeActivity;
 
 
 public class Activity_GoogleMap extends AppCompatActivity {
@@ -123,7 +124,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         // 設定在狀態列可以顯示處理中圖示 但是不知道為何沒出現
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        locationManager = MainActivity.lm;//(LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager = WelcomeActivity.lm;//(LocationManager) getSystemService(Context.LOCATION_SERVICE);
         myLocationListener = new MyLocationListener();
 
         setContentView(R.layout.layout_googlemap);

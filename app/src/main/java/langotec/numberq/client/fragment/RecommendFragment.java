@@ -3,7 +3,6 @@ package langotec.numberq.client.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -17,10 +16,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.adapter.MainSliderAdapter;
 import langotec.numberq.client.adapter.RecyclerViewAdapter;
-import langotec.numberq.client.MainActivity;
-import langotec.numberq.client.PicassoImageLoadingService;
+import langotec.numberq.client.adapter.PicassoImageLoadingService;
 import langotec.numberq.client.R;
 import langotec.numberq.client.map.Activity_GoogleMap;
 import ss.com.bannerslider.Slider;
@@ -81,8 +80,8 @@ public class RecommendFragment extends Fragment {
             public void onClick(View view) {
                 try {
                     //取得經緯度座標
-                    float latitude = (float) MainActivity.currentLocation.getLatitude();
-                    float longitude = (float) MainActivity.currentLocation.getLongitude();
+                    float latitude = (float) WelcomeActivity.currentLocation.getLatitude();
+                    float longitude = (float) WelcomeActivity.currentLocation.getLongitude();
                     //建立URI字串
                     String uri = String.format("geo:%f,%f?z=18", latitude, longitude);
                     //建立Intent物件

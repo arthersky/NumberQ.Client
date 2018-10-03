@@ -1,4 +1,4 @@
-package langotec.numberq.client;
+package langotec.numberq.client.adapter;
 
 import android.content.Context;
 import android.widget.ImageView;
