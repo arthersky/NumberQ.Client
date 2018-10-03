@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
@@ -60,6 +62,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            ArrayList StoreList = ;
             TextView textStoreName = (TextView) view.findViewById(R.id.textView1);
             TextView textBranchName = (TextView) view.findViewById(R.id.textView2);
+            TextView textNumber = (TextView)view.findViewById(R.id.textView4);
+            TextView textMinute = (TextView)view.findViewById(R.id.textView6);
+            TextView textIntroduction = (TextView)view.findViewById(R.id.textView8);
             ImageView storeIconImage = (ImageView) view.findViewById(R.id.store_icon);
 
             view.setOnClickListener(new View.OnClickListener() {
@@ -72,11 +77,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             if (store.getHeadName().equals("八方雲集")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
+                textIntroduction.setText("鍋貼、水餃專賣店");
             }else if (store.getHeadName().equals("鼎泰豐")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
+                textIntroduction.setText("世界知名小籠包");
             }
             textStoreName.setText(store.getHeadName());
             textBranchName.setText(store.getBranchName());
+
+            int number = (int)(Math.random()*10)+1;
+            textNumber.setText(number+"");
+            textMinute.setText(number*5+"");
+
         }
 
         else if (data.get(position) instanceof Menu){

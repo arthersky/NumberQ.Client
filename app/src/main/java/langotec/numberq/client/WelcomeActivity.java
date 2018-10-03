@@ -73,9 +73,15 @@ public class WelcomeActivity extends AppCompatActivity{
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
         //DBConn
-        currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        lat = currentLocation.getLatitude();
-        lng = currentLocation.getLongitude();
+        if (lat == 0.0 || lng == 0.0){
+            try{
+                currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                lat = currentLocation.getLatitude();
+                lng = currentLocation.getLongitude();
+            }catch (Exception e){
+                Log.e("LocationErr",""+e.toString());
+            }
+        }
         if(handler == null) handler = new MyHandler();
         search = new StoreDBConn();
         search.query(handler, getFilesDir(), lat,lng);
