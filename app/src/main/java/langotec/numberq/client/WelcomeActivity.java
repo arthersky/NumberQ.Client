@@ -234,8 +234,7 @@ public class WelcomeActivity extends AppCompatActivity{
         protected void onPostExecute(Void v) {
             super.onPostExecute(v);
             if (!qResult.equals("no record")) {
-                startActivity(new Intent()
-                        .setClass(getApplicationContext(), MainActivity.class));
+                startActivity(new Intent().setClass(getApplicationContext(), MainActivity.class));
                 finish();
             }else{
                 showDialog();
