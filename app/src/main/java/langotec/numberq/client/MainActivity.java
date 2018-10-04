@@ -10,8 +10,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-
 import langotec.numberq.client.adapter.BottomNavigationViewHelper;
 import langotec.numberq.client.adapter.ViewPagerAdapter;
 import langotec.numberq.client.fragment.CartFragment;
@@ -21,13 +19,6 @@ import langotec.numberq.client.fragment.RecommendFragment;
 
 
 public class MainActivity extends AppCompatActivity {
-    //location
-    double lat = 0.0;
-    double lng = 0.0;
-
-    //store array
-    public static ArrayList<Store> storeList;
-
     //title Array
     private String[] titles;
 
@@ -51,29 +42,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //take data bundle
-        try{
-//            Bundle data = getIntent().getExtras();
-//            if (lat == 0.0){
-//                lat = data.getDouble("lat");
-//            }
-//            if (lng == 0.0){
-//                lng = data.getDouble("lng");
-//            }
-//            Log.e("Location","Lat:"+lat+" Lng:"+lng);
-            if (storeList == null){
-                try{
-                    storeList = new ArrayList<>();
-                    storeList = (ArrayList<Store>)getIntent().getSerializableExtra("storeList");
-                    Log.e("data",""+storeList.get(1).getHeadName());
-                }catch (Exception e){
-                    Log.e("dataE",""+e.toString());
-                }
-            }
-        }catch (Exception e){
-            Log.e("TAG",e.toString());
-        }
 
         //Initializing the bottomNavigationView
         bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
@@ -160,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
     }
 
     private void setupViewPager(ViewPager viewPager) {

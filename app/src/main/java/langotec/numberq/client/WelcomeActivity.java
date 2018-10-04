@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +19,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import langotec.numberq.client.dbConnect.StoreDBConn;
+import okhttp3.Call;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class WelcomeActivity extends AppCompatActivity{
 
@@ -28,7 +35,7 @@ public class WelcomeActivity extends AppCompatActivity{
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 101;
     public static LocationManager lm;
     public static Location currentLocation = null;
-    public LocationListener ll;
+    public static LocationListener ll;
     public static double lat, lng;
 
     //DBConn
@@ -39,52 +46,53 @@ public class WelcomeActivity extends AppCompatActivity{
     private StoreDBConn search;
     private MyHandler handler;
     private ArrayList<Store> storeList = new ArrayList<>();
-    private Context context;
+
+    public static Context context;
+    boolean isFirst;
+    private String qResult = "no record";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         context = this;
+        isFirst = true;
+        isFirst = getIntent().getBooleanExtra("isFirst", isFirst);
+        if (isFirst) {
+            new OkHttpHandler().execute(MENU_SERVER);
+//        new OkHttpHandler().execute(STORE_SERVER);
 
-        //Location
-        // 取得定位服務的LocationManager物件
-        lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        // 檢查是否有啟用GPS
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // 顯示對話方塊啟用GPS
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.locationManager)
-                    .setMessage(R.string.locationMessage)
-                    .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // 使用Intent物件啟動設定程式來更改GPS設定
-                            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(i);
-                        }
-                    })
-                    .setNegativeButton(R.string.setNegativeButton, null).create().show();
-        }
-        //檢查版本和權限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-        //DBConn
-        if (lat == 0.0 || lng == 0.0){
-            try{
-                currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                lat = currentLocation.getLatitude();
-                lng = currentLocation.getLongitude();
-            }catch (Exception e){
-                Log.e("LocationErr",""+e.toString());
+            //Location
+            // 取得定位服務的LocationManager物件
+            lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+            // 檢查是否有啟用GPS
+            if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                // 顯示對話方塊啟用GPS
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.locationManager)
+                        .setMessage(R.string.locationMessage)
+                        .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // 使用Intent物件啟動設定程式來更改GPS設定
+                                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(i);
+                            }
+                        })
+                        .setNegativeButton(R.string.setNegativeButton, null).create().show();
             }
+            //檢查版本和權限
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            }
+            //DBConn
+            if(handler == null) handler = new MyHandler();
+            search = new StoreDBConn();
+            search.query(handler, getFilesDir(), lat,lng);
+
         }
-        if(handler == null) handler = new MyHandler();
-        search = new StoreDBConn();
-        search.query(handler, getFilesDir(), lat,lng);
     }
 
     @Override
@@ -134,6 +142,28 @@ public class WelcomeActivity extends AppCompatActivity{
         }
     }
 
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("提醒訊息")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setMessage("目前無法連線，請檢查您的網路設定，謝謝您")
+                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        new OkHttpHandler().execute(MENU_SERVER );
+                    }
+                })
+                .setNegativeButton("離開", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        finish();
+                    }
+                })
+                .create().show();
+    }
+
     private class MyLocationListener implements LocationListener {
         public void onLocationChanged(Location current) {
             if (current != null) {
@@ -150,6 +180,70 @@ public class WelcomeActivity extends AppCompatActivity{
         public void onStatusChanged(String provider, int status, Bundle extras) {}
     }
 
+    private class OkHttpHandler extends AsyncTask <String, Void, Void> {
+
+        OkHttpClient client = new OkHttpClient();
+
+        @Override
+        protected Void doInBackground(String... urls) {
+
+            OkHttpClient okHttpClient = new OkHttpClient();
+
+            //String... urls傳進來的是陣列，所以用for迴圈跑完全部的內容
+            for (String url : urls) {
+
+                // FormBody放要傳的參數和值
+                FormBody formBody = new FormBody.Builder()
+                        .add("sname", "鼎泰豐")
+                        .build();
+
+                // 建立Request，設置連線資訊
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(formBody) // 使用post連線
+                        .build();
+
+                // 建立Call
+                Call call = okHttpClient.newCall(request);
+
+                // 執行Call連線到網址
+                try {
+                    Response response = call.execute();//call.execute為同步工作
+                    if (response.isSuccessful() && response.code() == 200) {
+                        //同步方式下得到返回结果
+                        // response.code() return the HTTP status
+                        qResult = response.body().string().trim();
+                        if (qResult.equals("no record")) {
+                            Log.d("OkHttp result", "no record");
+                        } else {
+//                            Log.d("OkHttp result", qResult);
+                        }
+//                    createFile(qResult);
+                        response.close();
+                    } else {
+                        Log.e("failed", " no Data!");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            super.onPostExecute(v);
+            if (!qResult.equals("no record")) {
+                startActivity(new Intent()
+                        .setClass(getApplicationContext(), MainActivity.class));
+                finish();
+            }else{
+                showDialog();
+            }
+
+        }
+    }
+
     private class MyHandler extends Handler {
 
         @Override
@@ -160,39 +254,38 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("storeSearch isOk", String.valueOf(isOk));
             if(isConn){ // 網路已開啟
                 if(isOk) {
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                    builder.setTitle("搜尋")
+//                            .setMessage("搜尋成功!")
+//                            .setPositiveButton("確定", null)
+//                            .create().show();
                     storeList = search.getData();
                     Log.e("store1", storeList.get(1).getBranchName());
-                    if (storeList.size() != 0) {
-                        startActivity(new Intent()
-                                .setClass(context, MainActivity.class)
-                                .putExtra("storeList",storeList));
-                        finish();
-                    }
                 }else{
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                    builder.setTitle("搜尋")
+//                            .setMessage("無資料!")
+//                            .setPositiveButton("確定", null)
+//                            .create().show();
                     Log.e("DBConn","No Data");
                 }
             }else{
                 // 連線失敗,未開啟網路
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(getString(R.string.connFail_noConn))
-                        .setCancelable(false)
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .setMessage(getString(R.string.connFail_check))
-                        .setPositiveButton(getString(R.string.connFail_retry), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                                search.query(handler, getFilesDir(), lat,lng);
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.connFail_quit), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .create().show();
+//                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                builder.setTitle("登入")
+//                        .setIcon(android.R.drawable.ic_dialog_info)
+//                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
+//                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                dialogInterface.dismiss();
+//                            }
+//                        })
+//                        .create().show();
+                Log.e("DBConn","No Internet");
             }
         }
     }
+
+
 }
