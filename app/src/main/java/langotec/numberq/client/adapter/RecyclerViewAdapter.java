@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
+import langotec.numberq.client.Store;
 import langotec.numberq.client.dbConnect.MenuDBConn;
 import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.menu.Menu;
@@ -35,7 +38,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = null;
-        if (data.get(0) instanceof String) {
+        if (data.get(0) instanceof Store) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(
                     R.layout.cardview_store, viewGroup, false);
 
@@ -53,28 +56,39 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View view = viewHolder.view;
         context = view.getContext();
 
-        if (data.get(0) instanceof String) {
-            final String data = (String) this.data.get(position);
+        if (data.get(0) instanceof Store) {
+//            final String data = (String) this.data.get(position);
+            final Store store = (Store) data.get(position);
+//            ArrayList StoreList = ;
             TextView textStoreName = (TextView) view.findViewById(R.id.textView1);
+            TextView textBranchName = (TextView) view.findViewById(R.id.textView2);
+            TextView textNumber = (TextView)view.findViewById(R.id.textView4);
+            TextView textMinute = (TextView)view.findViewById(R.id.textView6);
+            TextView textIntroduction = (TextView)view.findViewById(R.id.textView8);
             ImageView storeIconImage = (ImageView) view.findViewById(R.id.store_icon);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new MenuDBConn(data, context).execute();
-//                    Intent intent = new Intent(v.getContext(), MenuActivity.class);
-//                    context.startActivity(intent);
+                    new MenuDBConn(((Store) data.get(position)).getHeadName(),
+                            ((Store) data.get(position)).getBranchName(), context).execute();
                 }
             });
 
-            if (position % 2 == 0) {
-                textStoreName.setTextColor(0xFF000000);
-                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
-            } else {
-                textStoreName.setTextColor(0xFFAAAAAA);
+            if (store.getHeadName().equals("八方雲集")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
+                textIntroduction.setText("鍋貼、水餃專賣店");
+            }else if (store.getHeadName().equals("鼎泰豐")){
+                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
+                textIntroduction.setText("世界知名小籠包");
             }
-            textStoreName.setText(data);
+            textStoreName.setText(store.getHeadName());
+            textBranchName.setText(store.getBranchName());
+
+            int number = (int)(Math.random()*10)+1;
+            textNumber.setText(number+"");
+            textMinute.setText(number*5+"");
+
         }
 
         else if (data.get(position) instanceof Menu){

@@ -28,7 +28,6 @@ public class StoreDBConn {
     private static final String USERLOGIN_PHP = "storequery.php";
 
     private ArrayList<Store> storeList = new ArrayList<Store>(); // 袋子放所有抓出來的資料
-    private Handler handler;
     private String lat, lng;
     private File dir;
     private String qResult;
@@ -36,22 +35,12 @@ public class StoreDBConn {
     public void storeDBConn(){   }
 
     public synchronized void query(Handler handler, File dir, double lat, double lng){
-        this.handler = handler;
         this.dir = dir;
         this.lat = String.valueOf(lat);
         this.lng = String.valueOf(lng);
 
         DBQuery dbquery = new DBQuery(handler);
         dbquery.start();
-//        try{
-//            dbquery.join();
-//        }catch (InterruptedException e){
-//            Log.e("query interrupted", "query interrupted!!!");
-//        }finally {
-//
-//            parseJSON(qResult);
-//            return storeList;
-//        }
     }
 
     private class DBQuery extends Thread {
@@ -82,31 +71,6 @@ public class StoreDBConn {
                     .build();
             // 建立Call
             Call call = okHttpClient.newCall(request);
-
-            // 執行Call連線到網址
-//             使用okhttp同步方式下得到返回结果
-//            try {
-//                Response response = call.execute();
-//                if(response.isSuccessful()){
-//
-//                    if (response.code() == 200) {   // response.code() return the HTTP status
-//                        qResult = response.body().string().trim();
-//                        Log.e("qResult", qResult);
-//                        if (qResult.equals("no record")) {
-//                            //Log.e("norecord.isUser", String.valueOf(isUser));
-//                        } else {
-//                            //Log.e("correct.isUser", String.valueOf(isUser));
-//                            Log.d("OkHttp result", qResult);
-//                        }
-//                        createFile(qResult);
-//                        //response.close();
-//                    }
-//                }else{
-//                    Log.e("failed", " no Data!");
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
 //region
 
             // 使用okhttp異步方式送出request
@@ -152,9 +116,8 @@ public class StoreDBConn {
                     hd.sendMessage(msg);
                 }
             });
-
-            //endregion
         }
+//endregion
 
         private void createFile(String result) {
             File file = new File(dir, "store.txt");
@@ -170,9 +133,6 @@ public class StoreDBConn {
                 // 寫入資料
                 osw.write(result);
                 osw.close();
-                //Toast.makeText(context, "File saved successfully!", Toast.LENGTH_SHORT).show();
-                // 讀取文擋資料
-                //readFile(new File(context.getFilesDir().getAbsolutePath(),fName));
             } catch(IOException e){
                 e.printStackTrace();
             }
