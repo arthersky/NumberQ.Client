@@ -1,8 +1,8 @@
 package langotec.numberq.client.login;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +27,7 @@ public class AccInfoActivity extends AppCompatActivity {
     private Context context;
     private Member mymb;
     private CustomerDBConn user;
+    private ProgressDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +46,23 @@ public class AccInfoActivity extends AppCompatActivity {
         btnlogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = new File(context.getFilesDir(),"customer.txt");
-                file.delete();
-                mymb.delete();
-                mymb = null;
-                finish();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("登出")
+                        .setIcon(android.R.drawable.stat_sys_warning)
+                        .setMessage("確定登出?")
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                File file = new File(context.getFilesDir(), "customer.txt");
+                                file.delete();
+                                mymb.delete();
+                                mymb = null;
+                                dialogInterface.dismiss();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("取消", null)
+                        .create().show();
             }
         });
 
@@ -60,6 +73,7 @@ public class AccInfoActivity extends AppCompatActivity {
                 String email = myemail.getText().toString();
                 String name = myname.getText().toString();
                 String phone = myphone.getText().toString();
+                loading = ProgressDialog.show(context,"修改會員資料","Loading...", false);
                 user = CustomerDBConn.getInstance();
                 MyHandler handler1 = new MyHandler();
                 user.update(handler1, getFilesDir(), uid, name, phone, email);
@@ -89,39 +103,25 @@ public class AccInfoActivity extends AppCompatActivity {
             Boolean isConn = bd.getBoolean("isConn");
             Log.e("update isOk", String.valueOf(isOk));
             Log.e("update isConn", String.valueOf(isConn));
-            if (isConn) { //連線成功
-                if (isOk) { // 使用者註冊成功
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("修改")
-                            .setIcon(android.R.drawable.ic_dialog_info)
-                            .setMessage("修改成功!")
-                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                    finish();
-                                }
-                            })
-                            .create().show();
-                }
-//               else {  // 使用者註冊失敗
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//                    builder.setTitle("註冊")
-//                            .setIcon(android.R.drawable.ic_dialog_info)
-//                            .setMessage("註冊失敗!\n請確認帳號未註冊。")
-//                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    dialogInterface.dismiss();
-//                                }
-//                            })
-//                            .create().show();
-//                }
+            loading.dismiss();
+            if (isConn && isOk) { //連線成功 & 使用者修改成功
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("修改")
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .setMessage("修改成功!")
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                finish();
+                            }
+                        })
+                        .create().show();
             } else { // 連線失敗,未開啟網路
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("修改")
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
+                        .setMessage("網路未連線!\n請確認您的網路連線狀態。")
                         .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {

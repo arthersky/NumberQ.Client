@@ -122,11 +122,6 @@
     <string name="connFail_check">請檢查您的網路設定，謝謝您</string>
     <string name="connFail_retry">再試一下</string>
     <string name="connFail_quit">離開</string>
-<<<<<<< HEAD
-=======
-
-    <string name="dialog_loading">Loading</string>
->>>>>>> 4765bd5078871fdb9f521c98c95761b28013152b
 
     <string name="dialog_loading">Loading</string>
     <string name="dialog_searchTitle">搜尋店家</string>

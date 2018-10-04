@@ -1,6 +1,7 @@
 package langotec.numberq.client.fragment;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,14 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.HashMap;
-
-import langotec.numberq.client.MainActivity;
+import langotec.numberq.client.R;
 import langotec.numberq.client.dbConnect.CustomerDBConn;
-import langotec.numberq.client.dbConnect.ReadFile;
 import langotec.numberq.client.login.AccInfoActivity;
 import langotec.numberq.client.login.LoginActivity;
-import langotec.numberq.client.R;
 import langotec.numberq.client.login.Member;
 
 /**
@@ -34,10 +31,11 @@ public class MoreFragment extends Fragment {
     public Context context = null;
     private Button btnCheck;
     private TextView status;
-    View view;
+    private View view;
     private Member member;
     private CustomerDBConn user;
     private MyHandler handler = new MyHandler();
+    private ProgressDialog loading;
 
     public MoreFragment() {
         // Required empty public constructor
@@ -77,6 +75,7 @@ public class MoreFragment extends Fragment {
                             Intent intent = new Intent(context, LoginActivity.class);
                             getActivity().startActivity(intent);
                         } else if (btnCheck.getText() == "我的檔案") {
+                            loading = ProgressDialog.show(getActivity(),"載入會員資料","Loading...", false);
                             user = CustomerDBConn.getInstance();
                             user.query(handler, context.getFilesDir(), member.getEmail(), member.getPassword());
                         }
@@ -106,6 +105,7 @@ public class MoreFragment extends Fragment {
             Boolean isConn = bd.getBoolean("isConn");
             Log.e("login.isOk", String.valueOf(isOk));
             Log.e("login.isConn", String.valueOf(isConn));
+            loading.dismiss();
             if (isConn && isOk) { //連線成功
                 // 使用者已註冊
                 member = user.getData();
@@ -114,7 +114,7 @@ public class MoreFragment extends Fragment {
                 //Log.e("member.email",member.getEmail());
                 getActivity().startActivity(intent);
             } else { // 連線失敗,未開啟網路
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle("登入")
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setMessage("網路未連線!\n請確認網路您的連線狀態。")

@@ -36,6 +36,7 @@
     <color name="QSecondary50">#FAE4EB</color>
     <color name="QSurface">#FFFFFF</color>
     <color name="QDark">#F5F5F5</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 
     <color name="black_overlay">#66000000</color>
     <color name="colorAccent">#ff4081</color>

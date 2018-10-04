@@ -60,6 +60,8 @@ public class StoreDBConn {
             //final MediaType FORM_CONTENT_TYPE = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
             //String param = "p=pass&w=storeList&n=10&lat="+lat+"&lng="+lng;
             // FormBody放要傳的參數和值
+            Log.e("DBQuery_lat", String.valueOf(lat));
+            Log.e("DBQuery_lng", String.valueOf(lng));
             FormBody formBody = new FormBody.Builder()
                     .add("p", "pass")
                     .add("w", "storeList")

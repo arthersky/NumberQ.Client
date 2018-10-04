@@ -1,5 +1,6 @@
 package langotec.numberq.client.login;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +29,7 @@ public class AccRegiActivity extends AppCompatActivity {
     private Context context;
     private CustomerDBConn user;
     private String email, pwd;
+    private ProgressDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +37,6 @@ public class AccRegiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_acc_regi);
         context = this;
         setLayout();
-
     }
 
     private void setLayout(){
@@ -48,66 +50,58 @@ public class AccRegiActivity extends AppCompatActivity {
 
     public void createNewAccount(View v){
         final String email = etEmail.getText().toString();
-        final String nickname=etNickName.getText().toString();
-        final String password =pw1.getText().toString();
-        String password2 =pw2.getText().toString();
-        String phone= etPhone.getText().toString();
-        Boolean datacheck = false;
-        if(email.isEmpty()){
-            Toast.makeText(this,"請輸入email帳號",Toast.LENGTH_LONG).show();
+        final String nickname = etNickName.getText().toString();
+        final String password = pw1.getText().toString();
+        String password2 = pw2.getText().toString();
+        String phone = etPhone.getText().toString();
+        Boolean datacheck = true;
+        if(!isVaildEmailFormat(email)){
+            Toast.makeText(this,"請輸入正確的email帳號",Toast.LENGTH_LONG).show();
             datacheck = false;
-            return;
-        }else{
-            datacheck = true;
-        }
-
-        if(nickname.isEmpty()){
+        } else if(nickname.isEmpty()){
             Toast.makeText(this,"請輸入暱稱",Toast.LENGTH_LONG).show();
             datacheck = false;
-            return;
-        }else{
-            datacheck = true;
-        }
-
-        if(password.isEmpty()){
+        } else if(password.isEmpty()){
             Toast.makeText(this,"請輸入密碼8-10碼",Toast.LENGTH_LONG).show();
             datacheck = false;
-            return;
-        }else if(password.length() <8 || password.length()>10){
-            Toast.makeText(this,"密碼長度最小8,最大10",Toast.LENGTH_LONG).show();
+        } else if(password.length() <8 || password.length()>10) {
+            Toast.makeText(this, "密碼長度最小8,最大10", Toast.LENGTH_LONG).show();
             datacheck = false;
-        }else{
-            datacheck = true;
-        }
-
-        if(password2.isEmpty()) {
+        } else if(password2.isEmpty()) {
             Toast.makeText(this, "請再輸入同密碼", Toast.LENGTH_LONG).show();
             datacheck = false;
-        }else{
-            datacheck = true;
-        }
-
-        if(!(password.equals(password2))){
+        } else if(!(password.equals(password2))){
             Toast.makeText(this,"密碼不一致請重新輸入",Toast.LENGTH_LONG).show();
             datacheck = false;
-            return;
-        }else{
-            datacheck = true;
-        }
-
-        if(phone.isEmpty()){
-            Toast.makeText(this,"請輸入手機號碼",Toast.LENGTH_LONG).show();
+        } else if(!isVaildPhoneFormat(phone)){
+            Toast.makeText(this,"請輸入正確手機號碼",Toast.LENGTH_LONG).show();
             datacheck = false;
-            return;
-        }else{
-            datacheck = true;
+            //}else{
+            //    datacheck = true;
         }
 
         if(datacheck){
+            loading = ProgressDialog.show(context,"註冊會員","Loading...", false);
             handler = new MyHandler();
             user = CustomerDBConn.getInstance();
             user.insert(handler, getFilesDir(), nickname,phone, email, password);
         }
+    }
+
+    // 判斷是否為 E-mail 格式
+    private boolean isVaildEmailFormat(String email)
+    {
+        if (email == null)
+            return false;
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    // 判斷是否為 Mobile Phone Number 格式
+    private boolean isVaildPhoneFormat(String phone) {
+        if(phone.isEmpty() || phone == null ){
+            return false;
+        }
+        return Patterns.PHONE.matcher(phone).matches();
     }
 
     class MyHandler extends Handler {
@@ -119,6 +113,7 @@ public class AccRegiActivity extends AppCompatActivity {
             Boolean isConn = bd.getBoolean("isConn");
             Log.e("register isOk", String.valueOf(isOk));
             Log.e("register isConn", String.valueOf(isConn));
+            loading.dismiss();
             if (isConn) { //連線成功
                 if (isOk) { // 使用者註冊成功
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);

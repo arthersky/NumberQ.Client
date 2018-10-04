@@ -1,5 +1,6 @@
 package langotec.numberq.client.login;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
@@ -31,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private Context context;
     private CustomerDBConn user;
     private String email, pwd, startFrom;
+    private ProgressDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +51,15 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 email = etEmail.getText().toString();
                 pwd = etPass.getText().toString();
-                user = CustomerDBConn.getInstance();
-                if(handler == null) handler = new MyHandler();
-                user.query(handler, getFilesDir(), email, pwd);
+                if(!isVaildEmailFormat(email)){
+                    Toast.makeText(context,"請輸入正確的e-mail", Toast.LENGTH_LONG).show();
+                }else{
+                    loading = ProgressDialog.show(context, "登入中","Loading...", false);
+                    user = CustomerDBConn.getInstance();
+                    handler = new MyHandler();
+                    user.query(handler, getFilesDir(), email, pwd);
+                }
+
             }
         });
 
@@ -82,6 +92,13 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin=findViewById(R.id.btnLogin);
     }
 
+    private boolean isVaildEmailFormat(String email)
+    {
+        if (email == null)
+            return false;
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
     class MyHandler extends Handler {
 
         @Override
@@ -91,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
             Boolean isConn = bd.getBoolean("isConn");
             Log.e("login.isOk", String.valueOf(isOk));
             Log.e("login.isConn", String.valueOf(isConn));
+            loading.dismiss();
             if (isConn) { //連線成功
                 if (isOk) { // 使用者已註冊
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -130,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("登入")
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
+                        .setMessage("網路未連線!\n請確認您的網路連線狀態。")
                         .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {

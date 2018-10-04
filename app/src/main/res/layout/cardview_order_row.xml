@@ -16,15 +16,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/order_storeImage"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ding" />
+            <ImageView
+                android:id="@+id/order_storeImage"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_image_black_512dp" />
 
                 <TextView
                     android:id="@+id/order_storeName"
