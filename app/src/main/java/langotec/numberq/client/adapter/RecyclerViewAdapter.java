@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
@@ -82,6 +84,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             textStoreName.setText(store.getHeadName());
             textBranchName.setText(store.getBranchName());
+
+            int number = (int)(Math.random()*10)+1;
+            textNumber.setText(number+"");
+            textMinute.setText(number*5+"");
+
         }
 
         else if (data.get(position) instanceof Menu){

@@ -170,6 +170,13 @@ public class MainActivity extends AppCompatActivity {
         cartFragment =new CartFragment();
         moreFragment = new MoreFragment();
 
+<<<<<<< HEAD
+=======
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("storeList",storeList);
+//        recommendFragment.setArguments(bundle);
+
+>>>>>>> 4765bd5078871fdb9f521c98c95761b28013152b
         adapter.addFragment(recommendFragment);
         adapter.addFragment(orderFragment);
         adapter.addFragment(cartFragment);

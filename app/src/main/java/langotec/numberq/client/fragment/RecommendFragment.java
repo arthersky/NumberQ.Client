@@ -22,7 +22,10 @@ import android.widget.EditText;
 import java.util.ArrayList;
 
 import langotec.numberq.client.MainActivity;
+<<<<<<< HEAD
 import langotec.numberq.client.R;
+=======
+>>>>>>> 4765bd5078871fdb9f521c98c95761b28013152b
 import langotec.numberq.client.Store;
 import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.adapter.MainSliderAdapter;
@@ -52,14 +55,24 @@ public class RecommendFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+<<<<<<< HEAD
         setHasOptionsMenu(true);
+=======
+>>>>>>> 4765bd5078871fdb9f521c98c95761b28013152b
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+<<<<<<< HEAD
         storeList = MainActivity.storeList;
         context = getContext(); //android.app.Application@ce249d0
+=======
+//        storeList = (ArrayList<Store>) getArguments().getSerializable("storeList");
+        storeList = MainActivity.storeList;
+        Log.e("datafrg",""+storeList.get(1).getHeadName());
+        context = getActivity().getApplicationContext(); //android.app.Application@ce249d0
+>>>>>>> 4765bd5078871fdb9f521c98c95761b28013152b
         View view = inflater.inflate(R.layout.fragment_recommend, container, false);
 
         // Inflate the layout for this fragment
