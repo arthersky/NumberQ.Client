@@ -18,10 +18,6 @@ import langotec.numberq.client.R;
 public class MenuActivity extends AppCompatActivity {
 
     private Context context;
-    private ArrayList<Menu> menus;
-    private MenuBaseAdapter adapter;
-    private String headName;
-    private String branchName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,16 +35,13 @@ public class MenuActivity extends AppCompatActivity {
 
     private void setLayout() {
         ListView listView = findViewById(R.id.list);
-        menus = (ArrayList) getIntent().getSerializableExtra("menuList");
-        headName = "鼎泰豐";
-        branchName = "信義店";
+        ArrayList<Menu> menus = (ArrayList) getIntent().getSerializableExtra("menuList");
 
-        //Todo: 獲取從MainActivity的店家資料
-        setTitle(headName + " - " + branchName);
+        setTitle(menus.get(0).getHeadName() + " - " + menus.get(0).getBranchName());
 
         listView.setEmptyView(findViewById(R.id.emptyView));
 
-        adapter = new MenuBaseAdapter(context, menus);
+        MenuBaseAdapter adapter = new MenuBaseAdapter(context, menus);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

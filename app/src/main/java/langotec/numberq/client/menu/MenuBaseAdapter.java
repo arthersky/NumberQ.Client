@@ -65,6 +65,10 @@ public class MenuBaseAdapter extends BaseAdapter {
 			Menu menu = order.get(0);
             String str[] = setTextLoop(order);
 			//設定單一訂單標題
+			if (menu.getHeadName().equals("鼎泰豐"))
+				holder.imageView.setImageResource(R.drawable.ding);
+			else
+				holder.imageView.setImageResource(R.drawable.bafun);
 			holder.textName.setText(menu.getHeadName() + " - " + menu.getBranchName());
             holder.textMenuName.setText(str[0]);
             holder.textQuantity.setText(str[1]);

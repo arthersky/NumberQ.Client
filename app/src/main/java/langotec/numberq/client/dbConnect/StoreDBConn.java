@@ -19,6 +19,7 @@ import langotec.numberq.client.Store;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -28,34 +29,23 @@ public class StoreDBConn {
     private static final String USERLOGIN_PHP = "storequery.php";
 
     private ArrayList<Store> storeList = new ArrayList<Store>(); // 袋子放所有抓出來的資料
-    private Handler handler;
     private String lat, lng;
     private File dir;
     private String qResult;
 
-    public void storeDBConn(){   }
+    public void storeDBConn(){}
 
     public synchronized void query(Handler handler, File dir, double lat, double lng){
-        this.handler = handler;
         this.dir = dir;
         this.lat = String.valueOf(lat);
         this.lng = String.valueOf(lng);
 
         DBQuery dbquery = new DBQuery(handler);
         dbquery.start();
-//        try{
-//            dbquery.join();
-//        }catch (InterruptedException e){
-//            Log.e("query interrupted", "query interrupted!!!");
-//        }finally {
-//
-//            parseJSON(qResult);
-//            return storeList;
-//        }
     }
 
     private class DBQuery extends Thread {
-        OkHttpClientSingleton okHttpClient;
+
         private Handler hd;
 
         public DBQuery(Handler handler){
@@ -65,8 +55,10 @@ public class StoreDBConn {
         public void run() {
             // 使用okhttp3建立連線
             // 建立OkHttpClient
-            okHttpClient = OkHttpClientSingleton.getInstance();
-
+            OkHttpClient okHttpClient = new OkHttpClient();
+            //Charset charset = Charset.forName(StandardCharsets.UTF_8.name());
+            //final MediaType FORM_CONTENT_TYPE = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+            //String param = "p=pass&w=storeList&n=10&lat="+lat+"&lng="+lng;
             // FormBody放要傳的參數和值
             FormBody formBody = new FormBody.Builder()
                     .add("p", "pass")
@@ -82,31 +74,6 @@ public class StoreDBConn {
                     .build();
             // 建立Call
             Call call = okHttpClient.newCall(request);
-
-            // 執行Call連線到網址
-//             使用okhttp同步方式下得到返回结果
-//            try {
-//                Response response = call.execute();
-//                if(response.isSuccessful()){
-//
-//                    if (response.code() == 200) {   // response.code() return the HTTP status
-//                        qResult = response.body().string().trim();
-//                        Log.e("qResult", qResult);
-//                        if (qResult.equals("no record")) {
-//                            //Log.e("norecord.isUser", String.valueOf(isUser));
-//                        } else {
-//                            //Log.e("correct.isUser", String.valueOf(isUser));
-//                            Log.d("OkHttp result", qResult);
-//                        }
-//                        createFile(qResult);
-//                        //response.close();
-//                    }
-//                }else{
-//                    Log.e("failed", " no Data!");
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
 //region
 
             // 使用okhttp異步方式送出request
@@ -152,9 +119,8 @@ public class StoreDBConn {
                     hd.sendMessage(msg);
                 }
             });
-
-            //endregion
         }
+//endregion
 
         private void createFile(String result) {
             File file = new File(dir, "store.txt");
@@ -170,9 +136,6 @@ public class StoreDBConn {
                 // 寫入資料
                 osw.write(result);
                 osw.close();
-                //Toast.makeText(context, "File saved successfully!", Toast.LENGTH_SHORT).show();
-                // 讀取文擋資料
-                //readFile(new File(context.getFilesDir().getAbsolutePath(),fName));
             } catch(IOException e){
                 e.printStackTrace();
             }
@@ -194,6 +157,7 @@ public class StoreDBConn {
                 JSONObject jsObj = jsArray.getJSONObject(i);
                 Log.e("jsobj", String.valueOf(jsObj));
                 String HeadName = jsObj.getString("HeadName");
+                String headImg = jsObj.getString("HeadImg");
                 int id = Integer.parseInt(jsObj.getString("id"));
                 String HeadId = jsObj.getString("HeadId");
                 int BranchId = Integer.parseInt(jsObj.getString("BranchId"));
@@ -208,7 +172,7 @@ public class StoreDBConn {
                 int waitingNumber = Integer.parseInt(jsObj.getString("waitingNumber"));
                 double lat = Double.parseDouble(jsObj.getString("lat"));
                 double lng = Double.parseDouble(jsObj.getString("lng"));
-                Store store = new Store(HeadName, id, HeadId, BranchId, BranchName, City, Area, Address, Phone, FAX, opening, inService, waitingNumber, lat, lng);
+                Store store = new Store(HeadName, headImg, id, HeadId, BranchId, BranchName, City, Area, Address, Phone, FAX, opening, inService, waitingNumber, lat, lng);
                 storeList.add(store);
             }
         } catch (JSONException e) {

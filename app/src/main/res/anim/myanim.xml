@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:interpolator="@anim/cycle" >
+
+    <translate
+        android:duration="1000"
+        android:propertyName="scaleX"
+        android:repeatCount="2"
+        android:repeatMode="reverse"
+        android:valueFrom="1"
+        android:valueTo="2.5f"
+        android:valueType="floatType" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:toXDelta="-10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:toXDelta="-10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:toXDelta="-10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:toXDelta="-10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="300"
+        android:toXDelta="10"
+        android:toYDelta="-10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="600"
+        android:toXDelta="-10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="600"
+        android:fromXDelta="0"
+        android:fromYDelta="0"
+        android:startOffset="900"
+        android:toXDelta="10"
+        android:toYDelta="10" />
+    <translate
+        android:duration="1000"
+        android:propertyName="scaleX"
+        android:repeatCount="2"
+        android:repeatMode="reverse"
+        android:startOffset="1000"
+        android:valueFrom="1"
+        android:valueTo="2.5f"
+        android:valueType="floatType" />
+
+</set>

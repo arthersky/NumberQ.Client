@@ -1,6 +1,5 @@
 package langotec.numberq.client;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -10,7 +9,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -28,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     double lng = 0.0;
 
     //store array
-    private ArrayList<Store> storeList;
+    public static ArrayList<Store> storeList;
 
     //title Array
     private String[] titles;
@@ -172,10 +170,6 @@ public class MainActivity extends AppCompatActivity {
         cartFragment =new CartFragment();
         moreFragment = new MoreFragment();
 
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("storeList",storeList);
-        recommendFragment.setArguments(bundle);
-
         adapter.addFragment(recommendFragment);
         adapter.addFragment(orderFragment);
         adapter.addFragment(cartFragment);
@@ -197,14 +191,5 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main,menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.search_button:
-                Toast.makeText(this, "Search", Toast.LENGTH_SHORT).show();
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

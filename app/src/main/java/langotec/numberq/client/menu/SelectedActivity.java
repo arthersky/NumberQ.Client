@@ -138,6 +138,7 @@ public class SelectedActivity extends AppCompatActivity {
     }
 
     //region 設定最下方的總價文字
+    @SuppressLint("SetTextI18n")
     private void setTotalText(){
         totalText.setText(getResources().getString(R.string.menu_NT) + (Integer.valueOf(menu.getPrice()) * menu.getQuantityNum()));
     }
@@ -151,11 +152,11 @@ public class SelectedActivity extends AppCompatActivity {
             switch (view.getId()){
                 case R.id.subtractView:
                     menu.setQuantityNum(--quantity);
-                    quantityText.setText("" + menu.getQuantityNum());
+                    quantityText.setText(String.valueOf(menu.getQuantityNum()));
                     break;
                 case R.id.plusView:
                     menu.setQuantityNum(++quantity);
-                    quantityText.setText("" + menu.getQuantityNum());
+                    quantityText.setText(String.valueOf(menu.getQuantityNum()));
                     break;
             }
             setTotalText();
@@ -179,8 +180,9 @@ public class SelectedActivity extends AppCompatActivity {
                     cart.remove(i);
                 }
             }
-            Menu m = new Menu(menu.getHeadName(), menu.getHeadId(), menu.getProductId(), menu.getType(),
-                    menu.getProductName(), menu.getPrice(), menu.getImageURL(), menu.isAvailable(), menu.getDesc());
+            Menu m = new Menu(menu.getHeadName(), menu.getBranchName(), menu.getHeadId(),
+                    menu.getProductId(), menu.getType(),menu.getProductName(), menu.getPrice(),
+                    menu.getImageURL(), menu.isAvailable(), menu.getDesc());
             m.setQuantityNum(menu.getQuantityNum());
             cart.add(m);
         }
@@ -203,8 +205,10 @@ public class SelectedActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //強制製造一個新的相同Menu實體，防止物件指標重複指到相同Menu
-                        Menu m = new Menu(menu.getHeadName(), menu.getHeadId(), menu.getProductId(), menu.getType(),
-                                menu.getProductName(), menu.getPrice(), menu.getImageURL(), menu.isAvailable(), menu.getDesc());
+                        Menu m = new Menu(menu.getHeadName(), menu.getBranchName(),
+                                menu.getHeadId(), menu.getProductId(), menu.getType(),
+                                menu.getProductName(), menu.getPrice(), menu.getImageURL(),
+                                menu.isAvailable(), menu.getDesc());
                         m.setQuantityNum(menu.getQuantityNum());
                         cart.add(m);
                         Snackbar snackbar = Snackbar.make(findViewById(R.id.selected_constraintLayout),
@@ -252,7 +256,7 @@ public class SelectedActivity extends AppCompatActivity {
 
                 if (quantityText.getText().length() > 0) {
                     menu.setQuantityNum(Integer.parseInt(quantityText.getText().toString()));
-                    quantityText.setText("" + menu.getQuantityNum());
+                    quantityText.setText(String.valueOf(menu.getQuantityNum()));
                 }else
                     quantityText.setText("1");
                 quantityText.clearFocus();  //clear EditText focus
