@@ -37,6 +37,6 @@
     <color name="QSurface">#FFFFFF</color>
     <color name="QDark">#F5F5F5</color>
 
-    <color name="black_overlay">#66000000</color>
-    <color name="colorAccent">#ff4083</color>
+    <color name="black_overlay">#66000001</color>
+    <color name="colorAccent">#ff4082</color>
 </resources>
