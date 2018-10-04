@@ -1,18 +1,23 @@
 package langotec.numberq.client;
 
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
+
 import java.io.Serializable;
 
 public class Store implements Serializable {
-    private String HeadName;
+    private String headName;
+    private String headImg;
     private int id;
-    private String HeadId;
-    private int BranchId;
-    private String BranchName;
-    private String City;
-    private String Area;
-    private String Address;
-    private String Phone;
-    private String FAX;
+    private String headId;
+    private int branchId;
+    private String branchName;
+    private String city;
+    private String area;
+    private String address;
+    private String phone;
+    private String fax;
     private String opening;
     private int inService;
     private int waitingNumber;
@@ -23,9 +28,10 @@ public class Store implements Serializable {
 
     }
 
-    public Store(String HeadName, int id, String HeadId, int BranchId, String BranchName, String City, String Area, String Address,
-                 String Phone, String FAX, String opening, int inService, int waitingNumber, double lat, double lng){
+    public Store(String HeadName, String headImg, int id, String HeadId, int BranchId, String BranchName, String City, String Area, String Address,
+                 String Phone, String fax, String opening, int inService, int waitingNumber, double lat, double lng){
         setHeadName(HeadName);
+        setHeadImg(headImg);
         setHeadId(HeadId);
         setBranchId(BranchId);
         setBranchName(BranchName);
@@ -33,7 +39,7 @@ public class Store implements Serializable {
         setArea(Area);
         setAddress(Address);
         setPhone(Phone);
-        setFAX(FAX);
+        setFax(fax);
         setOpening(opening);
         setInService(inService);
         setWaitingNumber(waitingNumber);
@@ -42,11 +48,19 @@ public class Store implements Serializable {
     }
 
     public String getHeadName() {
-        return HeadName;
+        return headName;
     }
 
     public void setHeadName(String headName) {
-        HeadName = headName;
+        this.headName = headName;
+    }
+
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
     }
 
     public int getId() {
@@ -58,67 +72,67 @@ public class Store implements Serializable {
     }
 
     public String getHeadId() {
-        return HeadId;
+        return headId;
     }
 
     public void setHeadId(String headId) {
-        HeadId = headId;
+        this.headId = headId;
     }
 
     public int getBranchId() {
-        return BranchId;
+        return branchId;
     }
 
     public void setBranchId(int branchId) {
-        BranchId = branchId;
+        this.branchId = branchId;
     }
 
     public String getBranchName() {
-        return BranchName;
+        return branchName;
     }
 
     public void setBranchName(String branchName) {
-        BranchName = branchName;
+        this.branchName = branchName;
     }
 
     public String getCity() {
-        return City;
+        return city;
     }
 
     public void setCity(String city) {
-        City = city;
+        this.city = city;
     }
 
     public String getArea() {
-        return Area;
+        return area;
     }
 
     public void setArea(String area) {
-        Area = area;
+        this.area = area;
     }
 
     public String getAddress() {
-        return Address;
+        return address;
     }
 
     public void setAddress(String address) {
-        Address = address;
+        this.address = address;
     }
 
     public String getPhone() {
-        return Phone;
+        return phone;
     }
 
     public void setPhone(String phone) {
-        Phone = phone;
+        this.phone = phone;
     }
 
-    public String getFAX() {
-        return FAX;
+    public String getFax() {
+        return fax;
     }
 
-    public void setFAX(String FAX) {
-        this.FAX = FAX;
+    public void setFax(String fax) {
+        this.fax = fax;
     }
 
     public String getOpening() {
@@ -161,7 +175,13 @@ public class Store implements Serializable {
         this.lng = lng;
     }
 
-
+    public void setImageView(ImageView imageView, String imgUrl){
+        Picasso
+                .get()
+                .load(imgUrl)
+                .placeholder(R.drawable.placeholder)
+                .into(imageView);
+    }
 
 
 }

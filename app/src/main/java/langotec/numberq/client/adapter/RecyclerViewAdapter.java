@@ -56,33 +56,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         if (data.get(0) instanceof Store) {
 //            final String data = (String) this.data.get(position);
-            Store store = (Store) data.get(position);
+            final Store store = (Store) data.get(position);
 //            ArrayList StoreList = ;
             TextView textStoreName = (TextView) view.findViewById(R.id.textView1);
             TextView textBranchName = (TextView) view.findViewById(R.id.textView2);
+            TextView textNumber = (TextView)view.findViewById(R.id.textView4);
+            TextView textMinute = (TextView)view.findViewById(R.id.textView6);
+            TextView textIntroduction = (TextView)view.findViewById(R.id.textView8);
             ImageView storeIconImage = (ImageView) view.findViewById(R.id.store_icon);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new MenuDBConn(((Store) data.get(0)).getBranchName(), context).execute();
-//                    Intent intent = new Intent(v.getContext(), MenuActivity.class);
-//                    context.startActivity(intent);
+                    new MenuDBConn(((Store) data.get(position)).getHeadName(),
+                            ((Store) data.get(position)).getBranchName(), context).execute();
                 }
             });
 
-//            if (position % 2 == 0) {
-//                textStoreName.setTextColor(0xFF000000);
-//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
-//            } else {
-//                textStoreName.setTextColor(0xFFAAAAAA);
-//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
-//            }
-//            textStoreName.setText(data);
             if (store.getHeadName().equals("八方雲集")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
+                textIntroduction.setText("鍋貼、水餃專賣店");
             }else if (store.getHeadName().equals("鼎泰豐")){
                 storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
+                textIntroduction.setText("世界知名小籠包");
             }
             textStoreName.setText(store.getHeadName());
             textBranchName.setText(store.getBranchName());

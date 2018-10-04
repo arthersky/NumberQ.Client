@@ -18,18 +18,20 @@ public class Cart extends ArrayList<Menu> implements Serializable {
     private static final String CART_NAME = "cartData";
 
     //一位消費者應只有一台購物車，所以使用singleton模式
-    private volatile static Cart singletonCart = new Cart();
+    private volatile static Cart singletonCart;
     //不讓外部呼叫建構式
     private Cart(){}
 
     public static Cart getInstance(Context context){
         //先檢查是否已經有購物車的存檔，如果有就讀出來回傳
         if (hadCartFile(context)){
+            Log.e("hadcartfile", "true");
             File fileDir = new File(String.valueOf(context.getFilesDir()) +
                     "/" + CART_NAME);
             try {
                 FileInputStream fIn = new FileInputStream(fileDir);
                 ObjectInputStream oIn = new ObjectInputStream(fIn);
+                singletonCart = new Cart();
                 singletonCart = (Cart) oIn.readObject();
                 fileDir.delete();
                 oIn.close();
@@ -71,7 +73,7 @@ public class Cart extends ArrayList<Menu> implements Serializable {
         File fileDir = new File(String.valueOf(context.getFilesDir()));
         String[] existingFiles = fileDir.list();
         for (String file : existingFiles){
-            //如果已經有此檔案就離開method不再放入cache
+            //如果已經有此檔案就離開method不再新增檔案
             if (file.equals(CART_NAME))
                 return true;
         }

@@ -1,6 +1,10 @@
 package langotec.numberq.client.login;
 
+import android.content.Context;
+
 import java.io.Serializable;
+
+import langotec.numberq.client.dbConnect.ReadFile;
 
 public class Member implements Serializable {
     private static Member member;
@@ -109,5 +113,13 @@ public class Member implements Serializable {
 
     public void setFB_email(String FB_email) {
         this.FB_email = FB_email;
+    }
+
+    public Boolean checkLogin(Context context){
+        return new ReadFile(context.getFilesDir(), "customer.txt", member).read();
+    }
+
+    public void delete(){
+        member = null;
     }
 }
