@@ -8,9 +8,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -19,15 +19,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import langotec.numberq.client.dbConnect.StoreDBConn;
-import okhttp3.Call;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class WelcomeActivity extends AppCompatActivity{
 
@@ -35,8 +29,9 @@ public class WelcomeActivity extends AppCompatActivity{
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 101;
     public static LocationManager lm;
     public static Location currentLocation = null;
-    public static LocationListener ll;
-    public static double lat, lng;
+    public static Double lat = null , lng = null;
+    public LocationListener ll;
+    private CountDownTimer timer;
 
     //DBConn
     private static final String MENU_SERVER =
@@ -46,22 +41,14 @@ public class WelcomeActivity extends AppCompatActivity{
     private StoreDBConn search;
     private MyHandler handler;
     private ArrayList<Store> storeList = new ArrayList<>();
-
-    public static Context context;
-    boolean isFirst;
-    private String qResult = "no record";
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         context = this;
-        isFirst = true;
-        isFirst = getIntent().getBooleanExtra("isFirst", isFirst);
-        if (isFirst) {
-            new OkHttpHandler().execute(MENU_SERVER);
-//        new OkHttpHandler().execute(STORE_SERVER);
-        }
+
         //Location
         // 取得定位服務的LocationManager物件
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -81,19 +68,6 @@ public class WelcomeActivity extends AppCompatActivity{
                     })
                     .setNegativeButton(R.string.setNegativeButton, null).create().show();
         }
-        //檢查版本和權限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-        //DBConn
-        currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        lat = currentLocation.getLatitude();
-        lng = currentLocation.getLongitude();
-        if(handler == null) handler = new MyHandler();
-        search = new StoreDBConn();
-        search.query(handler, getFilesDir(), lat,lng);
     }
 
     @Override
@@ -114,6 +88,16 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
             Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
         }
+
+        //檢查版本和權限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+
+        countDownTimer();
     }
 
     @Override
@@ -143,28 +127,6 @@ public class WelcomeActivity extends AppCompatActivity{
         }
     }
 
-    private void showDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("提醒訊息")
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setMessage("目前無法連線，請檢查您的網路設定，謝謝您")
-                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        new OkHttpHandler().execute(MENU_SERVER );
-                    }
-                })
-                .setNegativeButton("離開", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        finish();
-                    }
-                })
-                .create().show();
-    }
-
     private class MyLocationListener implements LocationListener {
         public void onLocationChanged(Location current) {
             if (current != null) {
@@ -174,6 +136,8 @@ public class WelcomeActivity extends AppCompatActivity{
                 lng = current.getLongitude();
                 Toast.makeText(context, "經緯度座標變更....", Toast.LENGTH_SHORT).show();
                 Log.e("GPS","緯度: " + lat + " 經度: " + lng);
+                timer.onFinish();
+                timer.cancel();
             }
         }
         public void onProviderDisabled(String provider) {}
@@ -181,64 +145,30 @@ public class WelcomeActivity extends AppCompatActivity{
         public void onStatusChanged(String provider, int status, Bundle extras) {}
     }
 
-    private class OkHttpHandler extends AsyncTask <String, Void, Void> {
-
-        OkHttpClient client = new OkHttpClient();
-
-        @Override
-        protected Void doInBackground(String... urls) {
-
-            OkHttpClient okHttpClient = new OkHttpClient();
-
-            //String... urls傳進來的是陣列，所以用for迴圈跑完全部的內容
-            for (String url : urls) {
-
-                // FormBody放要傳的參數和值
-                FormBody formBody = new FormBody.Builder()
-                        .add("sname", "鼎泰豐")
-                        .build();
-
-                // 建立Request，設置連線資訊
-                Request request = new Request.Builder()
-                        .url(url)
-                        .post(formBody) // 使用post連線
-                        .build();
-
-                // 建立Call
-                Call call = okHttpClient.newCall(request);
-
-                // 執行Call連線到網址
-                try {
-                    Response response = call.execute();//call.execute為同步工作
-                    if (response.isSuccessful() && response.code() == 200) {
-                        //同步方式下得到返回结果
-                        // response.code() return the HTTP status
-                        qResult = response.body().string().trim();
-                        if (qResult.equals("no record")) {
-                            Log.d("OkHttp result", "no record");
-                        } else {
-//                            Log.d("OkHttp result", qResult);
-                        }
-//                    createFile(qResult);
-                        response.close();
-                    } else {
-                        Log.e("failed", " no Data!");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    private void countDownTimer(){
+        timer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long l) {
+                Log.e("lat", String.valueOf(lat));
+                Log.e("lat", String.valueOf(lng));
             }
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void v) {
-            super.onPostExecute(v);
-        }
+            @Override
+            public void onFinish() {
+                if (lat == null || lng == null){
+                    lat = 121.517;
+                    lng = 25.0451;
+                }
+                //DBConn
+                Log.e("lat", String.valueOf(lat));
+                Log.e("lat", String.valueOf(lng));
+                if(handler == null) handler = new MyHandler();
+                search = new StoreDBConn();
+                search.query(handler, getFilesDir(), lat, lng);
+            }
+        }.start();
     }
-
     private class MyHandler extends Handler {
-
         @Override
         public void handleMessage(Message msg){
             Bundle db = msg.getData();
@@ -249,13 +179,11 @@ public class WelcomeActivity extends AppCompatActivity{
                 if(isOk) {
                     storeList = search.getData();
                     Log.e("store1", storeList.get(1).getBranchName());
-                    if (!qResult.equals("no record")) {
+                    if (storeList.size() != 0) {
                         startActivity(new Intent()
-                                .setClass(getApplicationContext(), MainActivity.class)
-                                /*.putExtras(data)*/.putExtra("storeList",storeList));
+                                .setClass(context, MainActivity.class)
+                                .putExtra("storeList",storeList));
                         finish();
-                    }else{
-                        showDialog();
                     }
                 }else{
                     Log.e("DBConn","No Data");
@@ -263,19 +191,25 @@ public class WelcomeActivity extends AppCompatActivity{
             }else{
                 // 連線失敗,未開啟網路
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("登入")
+                builder.setTitle(getString(R.string.connFail_noConn))
+                        .setCancelable(false)
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setMessage("網路未連線!\n請確認網路您的連線狀態。")
-                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                        .setMessage(getString(R.string.connFail_check))
+                        .setPositiveButton(getString(R.string.connFail_retry), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
+                                search.query(handler, getFilesDir(), lat,lng);
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.connFail_quit), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
                             }
                         })
                         .create().show();
-                Log.e("DBConn","No Internet");
             }
         }
     }
-
 }

@@ -1,28 +1,33 @@
 package langotec.numberq.client.fragment;
 
 
+import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 
+import langotec.numberq.client.MainActivity;
+import langotec.numberq.client.R;
 import langotec.numberq.client.Store;
 import langotec.numberq.client.WelcomeActivity;
 import langotec.numberq.client.adapter.MainSliderAdapter;
-import langotec.numberq.client.adapter.RecyclerViewAdapter;
 import langotec.numberq.client.adapter.PicassoImageLoadingService;
-import langotec.numberq.client.R;
+import langotec.numberq.client.adapter.RecyclerViewAdapter;
 import langotec.numberq.client.map.Activity_GoogleMap;
 import ss.com.bannerslider.Slider;
 
@@ -42,22 +47,19 @@ public class RecommendFragment extends Fragment {
     Context context = null;
 
     public RecommendFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        storeList = (ArrayList<Store>) getArguments().getSerializable("storeList");
-        Log.e("datafrg",""+storeList.get(1).getHeadName());
-        context = getActivity().getApplicationContext(); //android.app.Application@ce249d0
+        storeList = MainActivity.storeList;
+        context = getContext(); //android.app.Application@ce249d0
         View view = inflater.inflate(R.layout.fragment_recommend, container, false);
 
         // Inflate the layout for this fragment
@@ -76,19 +78,7 @@ public class RecommendFragment extends Fragment {
         // 選擇一種Layout管理器這邊是選擇（linear layout manager）
         mLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(mLayoutManager);
-//        String[] mDataset = context.getResources().getStringArray(R.array.store);
-//        String[] storeHeadName = new String[storeList.size()];
-//        for (int i=0;i<storeList.size();i++){
-//            String storeName = storeList.get(i).getHeadName();
-//            storeHeadName[i] = storeName;
-//        }
-//        ArrayList myDataset = new ArrayList();
-//        for (int i = 0; i < storeHeadName.length; i++){
-//            myDataset.add(storeHeadName[i]);
-//        }
-
         // 設定適配器
-//        mAdapter = new RecyclerViewAdapter(myDataset);
         mAdapter = new RecyclerViewAdapter(storeList);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -107,15 +97,58 @@ public class RecommendFragment extends Fragment {
                     //Intent geoMap = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                     //startActivity(geoMap);  // 啟動活動
                     Intent intent = new Intent(getActivity(), Activity_GoogleMap.class);
-                    getActivity().startActivity(intent);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("work", 1);//傳遞Int 直接呼叫顯示附近店家
+                    intent.putExtras(bundle);
+                    getActivity().startActivity(intent, ActivityOptions.
+                            makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
                 }catch (Exception e){
-                    Log.e("TAG",e.toString());
+                    e.printStackTrace();
                 }
-                Toast.makeText(context, "Open Map", Toast.LENGTH_SHORT).show();
             }
         });
-
         return view;
-
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.search_button:
+                showDialog();
+                break;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showDialog(){
+        final EditText editText = new EditText(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.dialog_searchTitle)
+                .setMessage(R.string.dialog_searchMessage)
+                .setView(editText)
+                .setPositiveButton(R.string.menu_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (editText.getText().toString().length() != 0) {
+                            Intent intent = new Intent(getActivity(), Activity_GoogleMap.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("work", 3);//傳遞Int 直接呼叫顯示附近店家
+                            bundle.putString("searchString", editText.getText().toString());
+                            intent.putExtras(bundle);
+                            getActivity().startActivity(intent, ActivityOptions.
+                                    makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
+                            dialog.dismiss();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.menu_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create().show();
+    }
+
 }

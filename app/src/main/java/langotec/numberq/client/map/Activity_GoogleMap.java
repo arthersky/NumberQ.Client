@@ -1,8 +1,11 @@
 package langotec.numberq.client.map;
 
+import android.Manifest;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,34 +14,34 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.net.http.AndroidHttpClient;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.transition.Fade;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -51,72 +54,83 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import langotec.numberq.client.R;
-import langotec.numberq.client.MainActivity;
-import langotec.numberq.client.WelcomeActivity;
 
 
 public class Activity_GoogleMap extends AppCompatActivity {
+    public static final int FUNCTION_STORENEAR = 1;
+    public static final int FUNCTION_STORELIST = 2;
+    public static final int FUNCTION_STORESEARCH = 3;
+    public static final int FUNCTION_MAP_LOCATION = 4;
+    private int functionWork =-1;
     private MapView mapView;
     private GoogleMap gMap;
     private MyGoogleMapAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private Button bt1, bt2, bt3;
+    private Button bt1; private Button bt2; private Button bt3;
+    private ProgressBar progressBar;
     Context context;
     double lat, lng;
     double tlat,tlng;
+    boolean showRecycleView=true;
     private LocationManager locationManager;
     private MyLocationListener myLocationListener;
+    Animation animation;
 
-    private ArrayList<ItemStoreRow> itemStoreList;
+    private ArrayList<PhpDB.ItemListRow> itemStoreList;
     private HashMap<String,Object> newStoreItem = new HashMap<>();
     private ListView itemListView ;
     private SimpleAdapter adapter;
     private int id,position;
-    Marker marker01,marker02,marker03,marker04,marker05;
     FloatingActionButton fab;
-    MarkerOptions userLocMark;
-    MarkerOptions storeMarkList[];
-
-    //自訂商店物件
-    public class ItemStoreRow{
-        private HashMap<String,Object> StoreItem = new HashMap<String,Object>();
-        public void itemStoreRow(){
-            //StoreItem = new HashMap<String,Object>();
-        }
-
-        public void add(String key , Object obj)
-        {
-            StoreItem.put(key,obj);
-        }
-
-        public Object get(String key)
-        {
-            return StoreItem.get(key);
-        }
-
-        public int size(){
-            try
-            {
-                return StoreItem.size();
-            }catch(Exception e)
-            {
-                return 0;
-            }
-        }
-
-        public HashMap<String,Object> getAll(){
-          return StoreItem;
-        }
-
-    }
+    Marker userLocMark = null;
+    Marker storeMarkList[] = null;
 
     private LinearLayout mapinfo_panel;
     private TextView mapinfo;
+    private String searchString;
     //------------------------
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,30 +138,39 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         // 設定在狀態列可以顯示處理中圖示 但是不知道為何沒出現
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        locationManager = WelcomeActivity.lm;//(LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
+        setProgressBarIndeterminateVisibility(true);
+        setProgressBarVisibility(true);
+        setProgress(4500);
+
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         myLocationListener = new MyLocationListener();
 
         setContentView(R.layout.layout_googlemap);
         context = this;
 
         //取出上次位置
-        try{
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            lat=location.getLatitude();
-            lng=location.getLongitude();
-        }catch (SecurityException e){
-            Log.e("Location",e.toString());
-        }
-
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        lat = location.getLatitude();
+        lng = location.getLongitude();
 
         //連結Button功能
         bt1 = (Button) findViewById(R.id.gmap_button1);
         bt2 = (Button) findViewById(R.id.gmap_button2);
         bt3 = (Button) findViewById(R.id.gmap_button3);
+        animation= AnimationUtils.loadAnimation(Activity_GoogleMap.this, R.anim.myanim);
+        animation.setDuration(20000); //20秒的動畫!!
+
         fab = (FloatingActionButton) findViewById(R.id.Map_fab_Location_btn);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         fab.setEnabled(false);
+        fab.startAnimation(animation); //開始動畫
+        progressBar.setVisibility(ProgressBar.VISIBLE);
 
         bt1.setOnClickListener(new btnClickListener());
+        bt2.setOnClickListener(new btnClickListener());
+        bt3.setOnClickListener(new btnClickListener());
 
         //返回上一頁功能
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
@@ -159,16 +182,24 @@ public class Activity_GoogleMap extends AppCompatActivity {
         gMap = mapView.getMap();
         setGoogleMapSnippet(); //Map Mark可多行設定
 
-        processViews();
-        processControllers();
-
         //啟動顯示效果
         //getWindow().setEnterTransition(new Slide().setDuration(2000)); //滑入轉場動畫
         //getWindow().setEnterTransition(new Explode().setDuration(2000)); //轉場動畫
         getWindow().setEnterTransition(new Fade().setDuration(2000)); //淡入淡出轉場動畫
 
         addFloatingActionButton();
-        refresh_Record();
+
+        //取得上一頁傳來命令 work=1 附近定位
+        Bundle bundle = getIntent().getExtras();
+        if (bundle.getInt("work") == FUNCTION_STORENEAR)
+        {
+            functionWork = FUNCTION_STORENEAR;
+            refresh_Record(10,FUNCTION_STORENEAR,false);
+        }else if (bundle.getInt("work") == FUNCTION_STORESEARCH){
+            searchString = bundle.getString("searchString");
+            functionWork = FUNCTION_STORESEARCH;
+            refresh_Record(10, FUNCTION_STORESEARCH, true);
+        }
     }
 
     //Google Map相關===================================================
@@ -210,20 +241,20 @@ public class Activity_GoogleMap extends AppCompatActivity {
     {
         if (null != itemStoreList) {
             //已經有mark的話作清除動作
-            if (null !=storeMarkList) {
-                gMap.clear();
-                userLocMark = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng)));
-                gMap.addMarker(userLocMark);
-            }
-            storeMarkList = new MarkerOptions[itemStoreList.size()];
+            if (userLocMark != null) {userLocMark.remove(); userLocMark=null;}
+            userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
+
+            //移除已經標示的商店
+            if (storeMarkList != null) {for(int i=0;i< storeMarkList.length;i++) {storeMarkList[i].remove();storeMarkList[i]=null;}}
+            storeMarkList = new Marker[itemStoreList.size()];
+
             for (int i = 0; i < itemStoreList.size(); i++) {
                 //計算距離
-                tlat = Double.parseDouble(((ItemStoreRow) itemStoreList.get(i)).get("lat").toString());
-                tlng = Double.parseDouble(((ItemStoreRow) itemStoreList.get(i)).get("lng").toString());
+                tlat = Double.parseDouble(((PhpDB.ItemListRow) itemStoreList.get(i)).get("lat").toString());
+                tlng = Double.parseDouble(((PhpDB.ItemListRow) itemStoreList.get(i)).get("lng").toString());
 
                 String range = "" + GetDistance(tlat, tlng, lat, lng);
-                storeMarkList[i] = new MarkerOptions().position(new LatLng(tlat, tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title(((ItemStoreRow) itemStoreList.get(position)).get("HeadName").toString() + " " + ((ItemStoreRow) itemStoreList.get(position)).get("BranchName").toString()).snippet("住址："+ ((ItemStoreRow)itemStoreList.get(position)).get("City")+((ItemStoreRow)itemStoreList.get(position)).get("Area")+((ItemStoreRow)itemStoreList.get(position)).get("Address") +"\n電話："+ ((ItemStoreRow)itemStoreList.get(position)).get("Phone")+"\n距離：" + range + " 公尺");
-                gMap.addMarker((storeMarkList[i]));
+                storeMarkList[i] = gMap.addMarker(new MarkerOptions().position(new LatLng(tlat, tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title(((PhpDB.ItemListRow) itemStoreList.get(position)).get("HeadName").toString() + " " + ((PhpDB.ItemListRow) itemStoreList.get(position)).get("BranchName").toString()).snippet("住址："+ ((PhpDB.ItemListRow)itemStoreList.get(position)).get("City")+((PhpDB.ItemListRow)itemStoreList.get(position)).get("Area")+((PhpDB.ItemListRow)itemStoreList.get(position)).get("Address") +"\n電話："+ ((PhpDB.ItemListRow)itemStoreList.get(position)).get("Phone")+"\n距離：" + range + " 公尺"));
             }
         }
     }
@@ -233,22 +264,20 @@ public class Activity_GoogleMap extends AppCompatActivity {
     private void makeRecyclerView() {
         //--------------------------RecyclerView------------------------------
         ArrayList<String> myDataset = new ArrayList<>();
-        if (null==itemStoreList) {
-            Log.e("makeRecyclerView","==============重大錯誤!!沒有資料!!=============");
-            return;
-        }
+        if (null==itemStoreList) {Log.e("makeRecyclerView","==============重大錯誤!!沒有資料!!=============");return;}
 
-        //Log.e("RecycleView","Size:"+itemStoreList.size());
+        Log.e("RecycleView","Size:"+itemStoreList.size());
         for (int i = 0; i < itemStoreList.size(); i++) {
             //Log.e("test",(((HashMap<String, Object>)(itemStoreList.get(i)).get("HeadName")).toString()+" "+((HashMap<String, Object>)(itemStoreList.get(i)).get("BranchName")).toString()));
+            //Log.e("makeRecyclerView","itemStoreList(i): "+i +" = " + ((PhpDB.ItemListRow) itemStoreList.get(i)).getAll().toString());
 
             //計算距離
-            tlat = Double.parseDouble(((ItemStoreRow) itemStoreList.get(i)).get("lat").toString());
-            tlng = Double.parseDouble(((ItemStoreRow) itemStoreList.get(i)).get("lng").toString());
+            tlat = Double.parseDouble(((PhpDB.ItemListRow) itemStoreList.get(i)).get("lat").toString());
+            tlng = Double.parseDouble(((PhpDB.ItemListRow) itemStoreList.get(i)).get("lng").toString());
 
             String range =""+GetDistance(tlat,tlng,lat,lng);
             //Log.e("makeRecyclerView","range:"+tlng+","+tlat+" / " +lng +","+lat +"=" + range);
-            myDataset.add("店名：" + ((ItemStoreRow)itemStoreList.get(i)).get("HeadName") + " "+ ((ItemStoreRow)itemStoreList.get(i)).get("BranchName") +"\n住址："+ ((ItemStoreRow)itemStoreList.get(i)).get("City")+((ItemStoreRow)itemStoreList.get(i)).get("Area")+((ItemStoreRow)itemStoreList.get(i)).get("Address") +"\n電話："+ ((ItemStoreRow)itemStoreList.get(i)).get("Phone")+"\n距離："+range + " 公尺"  );
+            myDataset.add("店名：" + ((PhpDB.ItemListRow)itemStoreList.get(i)).get("HeadName") + " "+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("BranchName") +"\n住址："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("City")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Area")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Address") +"\n電話："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("Phone")+"\n距離："+range + " 公尺"  );
         }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.list_view_GoogleMap);
@@ -258,7 +287,9 @@ public class Activity_GoogleMap extends AppCompatActivity {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setVisibility(View.VISIBLE);
+        if (showRecycleView==true) mRecyclerView.setVisibility(View.VISIBLE);
+        else mRecyclerView.setVisibility(View.INVISIBLE);
+        Log.e("ShowRecycle",""+showRecycleView);
     }
 
     //button的點選事件
@@ -268,18 +299,47 @@ public class Activity_GoogleMap extends AppCompatActivity {
             switch (view.getId()) {
                 //附近店家
                 case R.id.gmap_button1:
-                    if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE) {
+                    Log.e("button1","button1");
+                    if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
+                    {
                         mRecyclerView.setVisibility(View.INVISIBLE);
-                    }else{
-                        makeRecyclerView();
-                        makeStoreListOnMap();}
+                    }
+                    else
+                    {
+                        functionWork = FUNCTION_STORENEAR;
+                        refresh_Record(10,FUNCTION_STORENEAR,true);
+                    }
+
                     break;
                 //所有店家
                 case R.id.gmap_button2:
+                    Log.e("button2","button2");
+                    if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
+                    {
+                        mRecyclerView.setVisibility(View.INVISIBLE);
+                    }
+                    else
+                    {
+                        functionWork = FUNCTION_STORELIST;
+                        refresh_Record(FUNCTION_STORELIST);
+                    }
                     break;
 
                 //搜尋店家
                 case R.id.gmap_button3:
+                    Log.e("button3","button3");
+                    if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
+                    {
+                        mRecyclerView.setVisibility(View.INVISIBLE);
+                    }
+                    else
+                    {
+                        functionWork = FUNCTION_STORESEARCH;
+                        refresh_Record(FUNCTION_STORESEARCH);
+                    }
+                    break;
+                default:
+                    Log.e("buttonX","沒有觸發對應功能!!");
                     break;
             }
         }
@@ -291,17 +351,14 @@ public class Activity_GoogleMap extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                userLocMark = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng)));
-                gMap.addMarker(userLocMark);
+                if(userLocMark != null) {userLocMark.remove();userLocMark = null;} //移除mark
+                userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
                 setProgressBarIndeterminateVisibility(true); // turn progress on
                 setProgressBarVisibility(true);
                 fab.setEnabled(false);
-                try{
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
-                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
-                }catch (SecurityException e){
-                    Log.e("TAG",e.toString());
-                }
+                locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
+                locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
+                fab.startAnimation(animation);
 
             }
         });
@@ -315,13 +372,8 @@ public class Activity_GoogleMap extends AppCompatActivity {
         setProgressBarIndeterminateVisibility(true);
         setProgressBarVisibility(true);
         // 執行註冊，設備是GPS，只會讀取一次位置資訊
-        try{
-            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
-            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
-        }catch (SecurityException e){
-            Log.e("TAG",e.toString());
-        }
-
+        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
+        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
 
     }
 
@@ -365,11 +417,13 @@ public class Activity_GoogleMap extends AppCompatActivity {
             if(location != null){
                 lat =location.getLatitude();
                 lng =  location.getLongitude();
+                if (userLocMark != null) {userLocMark.remove(); userLocMark=null;}
 
-                userLocMark = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng)));
-                gMap.addMarker(userLocMark);
+                userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(new LatLng(lat, lng)).zoom(16).bearing(0).tilt(25).build()));
+                fab.clearAnimation();;
                 fab.setEnabled(true);
+
             }
             // 關閉處理中圖示
             setProgressBarVisibility(false);
@@ -420,15 +474,14 @@ public class Activity_GoogleMap extends AppCompatActivity {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((ItemStoreRow)itemStoreList.get(position)).get("HeadName");
-                    //Toast.makeText(context, ((ItemStoreRow)itemStoreList.get(position)).get("HeadName") + " " +((ItemStoreRow)itemStoreList.get(position)).get("lat") +","+ ((ItemStoreRow)itemStoreList.get(position)).get("lng") + " Item " + position + " is clicked.", Toast.LENGTH_SHORT).show();
+                    ((PhpDB.ItemListRow)itemStoreList.get(position)).get("HeadName");
+                    //Toast.makeText(context, ((PhpDB.ItemStoreRow)itemStoreList.get(position)).get("HeadName") + " " +((PhpDB.ItemStoreRow)itemStoreList.get(position)).get("lat") +","+ ((PhpDB.ItemStoreRow)itemStoreList.get(position)).get("lng") + " Item " + position + " is clicked.", Toast.LENGTH_SHORT).show();
 
-
-                    tlat = Double.parseDouble(((ItemStoreRow)itemStoreList.get(position)).get("lat").toString());
-                    tlng = Double.parseDouble(((ItemStoreRow)itemStoreList.get(position)).get("lng").toString());
+                    tlat = Double.parseDouble(((PhpDB.ItemListRow)itemStoreList.get(position)).get("lat").toString());
+                    tlng = Double.parseDouble(((PhpDB.ItemListRow)itemStoreList.get(position)).get("lng").toString());
 
                     String range =""+GetDistance(tlat,tlng,lat,lng);
-                    gMap.addMarker(new MarkerOptions().position(new LatLng (tlat,tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title( ((ItemStoreRow)itemStoreList.get(position)).get("HeadName").toString() +" "+ ((ItemStoreRow)itemStoreList.get(position)).get("BranchName").toString()  ).snippet("距離："+range + " 公尺"));
+                    gMap.addMarker(new MarkerOptions().position(new LatLng (tlat,tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title( ((PhpDB.ItemListRow)itemStoreList.get(position)).get("HeadName").toString() +" "+ ((PhpDB.ItemListRow)itemStoreList.get(position)).get("BranchName").toString()  ).snippet("距離："+range + " 公尺"));
                     gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(new LatLng(tlat,tlng)).zoom(16).bearing(0).tilt(25).build()));
 
                     mRecyclerView.setVisibility(View.INVISIBLE);
@@ -452,117 +505,6 @@ public class Activity_GoogleMap extends AppCompatActivity {
         }
     }
 
-    private void processViews() {
-
-        // 顯示拖拉Marker訊息
-        mapinfo_panel = (LinearLayout) findViewById(R.id.mapinfo_panel);
-        mapinfo = (TextView) findViewById(R.id.info);
-
-        // 先建立一個設定Marker用的MarkerOptions物件
-        MarkerOptions markerOptions = new MarkerOptions();
-
-        // 建立設定Marker圖示用的物件
-        //BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.station);
-        // 設定Marker的地點、標題、說明和圖示
-        /*markerOptions.position(station01)
-                .title("臺北車站")
-                .snippet(station01.latitude+","+station01.longitude)
-                .icon(bitmapDescriptor);
-        // 加入Marker到地圖並取得傳回的Marker物件
-        marker01 = gMap.addMarker(markerOptions);
-
-        // 加入Marker到地圖並同時設定地點、標題、說明和圖示
-        marker02 = gMap.addMarker(new MarkerOptions()
-                .position(station02)
-                .title("萬華車站")
-                .snippet(station02.latitude+","+station02.longitude)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.station)));
-
-        // 加入Marker到地圖並同時設定地點、標題和說明
-        marker03 = gMap.addMarker(new MarkerOptions()
-                .position(station03)
-                .title("西門站")
-                .snippet(station03.latitude+","+station03.longitude));
-
-        // 加入Marker到地圖並同時設定地點、標題、說明和藍色預設圖示
-        marker04 = gMap.addMarker(new MarkerOptions()
-                .position(station04)
-                .title("中山站")
-                .snippet(station04.latitude+","+station04.longitude)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-        // 加入Marker到地圖並同時設定地點、標題、說明、黃色預設圖示和可以拖拉
-        marker05 = gMap.addMarker(new MarkerOptions()
-                .position(station05)
-                .title("善導寺站")
-                .snippet(station05.latitude+","+station05.longitude)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
-                .draggable(true));*/
-    }
-
-    private void processControllers() {
-        // 建立點擊Marker事件
-        GoogleMap.OnMarkerClickListener myMarkerClientListener;
-        myMarkerClientListener = new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                if(marker.equals(marker01)) {
-                    Toast.makeText(context, marker.getTitle(), Toast.LENGTH_SHORT).show();
-                    // 回傳true處理點擊事件
-                    return true;
-                }
-                else {
-                    // 回傳false不處理點擊事件，執行預設的點擊工作，顯示訊息視窗
-                    return false;
-                }
-            }
-        };
-
-
-        // 註冊點擊Marker事件
-        gMap.setOnMarkerClickListener(myMarkerClientListener);
-
-        // 建立Marker拖拉事件
-        GoogleMap.OnMarkerDragListener myMarkDragListerer;
-        myMarkDragListerer = new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-                // Marker正在移動，參數是操作中的Marker物件，
-                // 可以經由它取得最新的資訊，例如位置
-                if(marker.equals(marker05)){
-                    //顯示目前位置
-                    LatLng position = marker.getPosition();
-                    mapinfo.setText(marker.getTitle()+"："+position.latitude+","+position.longitude);
-                }
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-                // Marker結束拖拉，參數是操作的Marker物件
-                if(marker.equals(marker05)){
-                    //關閉顯示提示元件
-                    mapinfo_panel.setVisibility(View.INVISIBLE);
-                    marker05.setTitle("New Place");
-                    //取得mark目前的經緯度座標
-                    LatLng point = marker.getPosition();
-                    //取得目前位置
-                    marker05.setSnippet(getAddress(point));
-                }
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-                // Marker開始拖拉，參數是操作的Marker物件
-                if(marker.equals(marker05)){
-                    // 開啟顯示訊息元件
-                    mapinfo_panel.setVisibility(View.VISIBLE);
-                    mapinfo.setText("Drag Start..");
-                }
-            }
-        };
-        // 註冊拖拉Marker事件
-        gMap.setOnMarkerDragListener(myMarkDragListerer);
-    }
 
     private String getAddress(LatLng point) {
         String result ="Unknow";
@@ -586,16 +528,91 @@ public class Activity_GoogleMap extends AppCompatActivity {
         return result;
     }
 
-   //===========================資料庫=======================================
+    //===========================資料庫=======================================
 
     private void insertSQLRecord()
-    { new InsertSQL().start();}
+    {
+        //    new InsertSQL().start();
+    }
 
     private void UpdateSQLRecord()
-    {new UpdateSQL().start();	}
+    {
+        //    new UpdateSQL().start();
+    }
+
+    PhpDB db;
+    protected Handler hd = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            Log.e("呼叫方Handler 收到" ,"狀態:" + db.getState() + "\nHandler 發送過來的訊息：" + msg.obj);
+
+            if(db.getState() == true) {
+
+                itemStoreList = db.getDataSet();
+
+                //實驗性質
+                switch(functionWork) {
+                    case FUNCTION_STORENEAR:
+                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        makeRecyclerView();
+                        makeStoreListOnMap();
+                        break;
+                    case FUNCTION_STORELIST:
+                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        makeRecyclerView();
+                        makeStoreListOnMap();
+                        break;
+                    case FUNCTION_STORESEARCH:
+                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        makeRecyclerView();
+                        makeStoreListOnMap();
+                        break;
+                    default:
+                        Log.e("handleMessage","未知的命令");
+                        break;
+                }
+
+            }
+        }
+    };
+
+
 
     private void refresh_Record()
-    {	new SelectSQL().start();}
+    {
+        refresh_Record(10,0,true);
+    }
+
+    private void refresh_Record(int functionWork)
+    {
+        refresh_Record(-1,functionWork,true);
+    }
+
+    private void refresh_Record(int num,int functionWork,boolean showRecord)
+    {
+        db = new PhpDB(context, hd);
+        showRecycleView = showRecord;
+        switch(functionWork)
+        {
+            case FUNCTION_STORENEAR:
+                db.getPairSet().setPairLatLng(lat, lng);
+                db.getPairSet().setPairFunction(db.pairSet.phpSQLstoreList);
+                db.getPairSet().setPairNumLimit(num);
+                break;
+            case FUNCTION_STORELIST:
+                db.getPairSet().setPairFunction(db.pairSet.phpSQLstoreList);
+                db.getPairSet().setPairNumLimit(-1);
+                break;
+            case FUNCTION_STORESEARCH:
+                db.getPairSet().setPairFunction(db.pairSet.phpSQLstoreSearchByName);
+                db.getPairSet().setPairNumLimit(10);
+                db.getPairSet().setPairSearch(1,searchString);
+                break;
+
+        }
+
+        new Thread(db).start();
+    }
 
     private void deleteSQLRecord()
     {
@@ -608,7 +625,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        new DeleteSQL().start();
+                        //new DeleteSQL().start();
                         dialog.dismiss();
                     }
                 }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -619,265 +636,22 @@ public class Activity_GoogleMap extends AppCompatActivity {
         }).create().show();
     }
 
-    private class SelectSQL extends Thread
-    {
-        @Override
-        public void run()
-        {
-            ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLPwdFunction),getResources().getString(R.string.phpSQLPwd)));
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLFunction),getResources().getString(R.string.phpSQLstoreList)));
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLNumLimit),""+10));
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLLat),""+lat)); //lat
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLLng),""+lng)); //lng
-            pairs.add(new BasicNameValuePair(getResources().getString(R.string.phpSQLShowColumns),"true")); //顯示欄位
-
-            AndroidHttpClient androidHttpClient =null;
-
-            try {
-                //https://flashmage.000webhostapp.com/query.php?p=pass&w=storeList&n=10&lat=25&lng=121
-
-                String user_agent = System.getProperty("http_agent");
-                if (androidHttpClient == null) androidHttpClient = AndroidHttpClient.newInstance(user_agent);
-                HttpPost httppost = new HttpPost(getResources().getString(R.string.server) + getResources().getString(R.string.select));
-                httppost.setEntity(new UrlEncodedFormEntity(pairs));
-                Log.e("SelectSQL",pairs.toString());
-
-                HttpResponse response = androidHttpClient.execute(httppost);
-
-                final String status = response.getStatusLine().toString();
-                Log.e("=======",status.toString());
-                itemStoreList = new ArrayList<ItemStoreRow>();
-                if (status.split(" ")[1]	.equals("200")) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                    String readLine;
-
-                    //第一次是欄位名稱
-                    readLine = br.readLine();
-                    Log.e("Result", readLine);
-                    String[] item_Field_String =readLine.split(",");
-
-                    while (((readLine = br.readLine()) != null))
-                    {
-                        Log.e("Result", readLine);
-                        HashMap<String,Object> item = new HashMap<String,Object>();
-                        String[] item_String =readLine.split(",");
-                        ItemStoreRow itemStoreRow = new ItemStoreRow();
-                        Log.e("ItemStoreRow","Add");
-
-                        for (int i =0;i<item_String.length;i++)
-                        {
-                            itemStoreRow.add(item_Field_String[i], item_String[i]);
-                        }
-                        Log.e("itemStoreList","Add itemStoreRow");
-                        itemStoreList.add(itemStoreRow);
-                    }
-                    Log.e("SelectSQL:","ItemStoreList.Size:"+itemStoreList.size());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            /*adapter = new SimpleAdapter(
-                                    context,itemStoreList,
-                                    R.layout.row,
-                                    new String[]{"_id","sid","sname","sage"},
-                                    new int[]{R.id._id,R.id.sid,R.id.sname,R.id.sage} );
-                            itemListView.setAdapter(adapter);*/
-
-                            //Toast.makeText(context, "查詢成功" + status, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }else
-                {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Toast.makeText(context, "查詢失敗" + status, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            }catch( final Exception e)
-            {
-                Log.e("error","Catch HTTP error:" + e.toString());
-                e.printStackTrace();
-            }finally{
-                if (androidHttpClient != null) {
-                    androidHttpClient.close();
-                    androidHttpClient = null;
-                }
-                Log.e("error","Finally HTTP error");
-            }
-        }
-    } //Select Thread end
-
-    private class InsertSQL extends Thread {
-
-        @Override
-        public void run() {
-            Log.e("Insert","Run_Start");
-            if (null != newStoreItem) {
-                ArrayList<NameValuePair> pairs = new ArrayList<>();
-                pairs.add(new BasicNameValuePair("p", getResources().getString(R.string.phpSQLPwd)));
-                pairs.add(new BasicNameValuePair("sid", "" + newStoreItem.get("sid")));
-                pairs.add(new BasicNameValuePair("sname", "" + newStoreItem.get("sname")));
-                pairs.add(new BasicNameValuePair("sage", "" + newStoreItem.get("sage")));
-                Log.e("Insert","變數設定完畢");
-                AndroidHttpClient androidHttpClient = null;
-                try {
-                    String user_agent = System.getProperty("http_agent");
-                    if (androidHttpClient == null)
-                        androidHttpClient = AndroidHttpClient.newInstance(user_agent);
-                    HttpPost httpost = new HttpPost(getResources().getString(R.string.server) + getResources().getString(R.string.insert));
-                    httpost.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
-                    Log.e("InsertSQL1",pairs.toString());
-                    Log.e("InsertSQL2",httpost.getParams().toString());
-
-                    HttpResponse response = androidHttpClient.execute(httpost);
-                    final String status = response.getStatusLine().toString();
-
-                    if (status.split(" ")[1].equals("200")) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "新增成功" + status, Toast.LENGTH_LONG).show();
-                                refresh_Record();
-                                newStoreItem = null;
-                            }
-                        });
-                    } else {
-                        Log.e("InsertSQL","Null");
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "新增失敗" + status, Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (androidHttpClient != null) {
-                        androidHttpClient.close();
-                        androidHttpClient = null;
-                    }
-                }
-            }
-        }
-    }
-
-    private class UpdateSQL extends Thread {
-
-        @Override
-        public void run() {
-            if (null != newStoreItem) {
-                ArrayList<NameValuePair> pairs = new ArrayList<>();
-                pairs.add(new BasicNameValuePair("p", getResources().getString(R.string.phpSQLPwd)));
-                pairs.add(new BasicNameValuePair("id", "" + newStoreItem.get("_id")));
-                pairs.add(new BasicNameValuePair("sid", "" + newStoreItem.get("sid")));
-                pairs.add(new BasicNameValuePair("sname", "" + newStoreItem.get("sname")));
-                pairs.add(new BasicNameValuePair("sage", "" + newStoreItem.get("sage")));
-                AndroidHttpClient androidHttpClient = null;
-                try {
-                    String user_agent = System.getProperty("http_agent");
-                    if (androidHttpClient == null)
-                        androidHttpClient = AndroidHttpClient.newInstance(user_agent);
-                    HttpPost httpost = new HttpPost(getResources().getString(R.string.server) + getResources().getString(R.string.update));
-                    httpost.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
-
-                    HttpResponse response = androidHttpClient.execute(httpost);
-                    final String status = response.getStatusLine().toString();
-
-                    if (status.split(" ")[1].equals("200")) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "更新成功" + status, Toast.LENGTH_LONG).show();
-                                refresh_Record();
-                                newStoreItem = null;
-                            }
-                        });
-                    } else {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "更新失敗" + status, Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (androidHttpClient != null) {
-                        androidHttpClient.close();
-                        androidHttpClient = null;
-                    }
-                }
-            }
-        }
-    }
-
-    private class DeleteSQL extends Thread {
-        @Override
-        public void run() {
-            ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
-            pairs.add(new BasicNameValuePair("p", getResources().getString(R.string.phpSQLPwd)));
-            pairs.add(new BasicNameValuePair("id", "" + id));
-            AndroidHttpClient androidHttpClient = null;
-
-
-            try {
-                String user_agent = System.getProperty("http_agent");
-                if (androidHttpClient == null)
-                    androidHttpClient = AndroidHttpClient.newInstance(user_agent);
-                HttpPost httppost = new HttpPost(getResources().getString(R.string.server) + getResources().getString(R.string.delete));
-                httppost.setEntity(new UrlEncodedFormEntity(pairs));
-                HttpResponse response = androidHttpClient.execute(httppost);
-                final String status = response.getStatusLine().toString();
-                if (status.split(" ")[1].equals("200")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "刪除成功" + status, Toast.LENGTH_SHORT).show();
-                            refresh_Record();
-                        }
-                    });
-                } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "刪除失敗" + status, Toast.LENGTH_SHORT).show();
-                            refresh_Record();
-                        }
-                    });
-                }
-            } catch (Resources.NotFoundException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (androidHttpClient != null) {
-                    androidHttpClient.close();
-                    androidHttpClient = null;
-                }
-            }
-
-        }
-    }
 
     //===========計算兩經緯度之間距離==========================================
     private static final double EARTH_RADIUS = 6378.137;//赤道半徑(單位km)
 
-    private static double rad(double d) {  return d * Math.PI / 180.0;  }
+    private static double rad(double d)
+    {  return d * Math.PI / 180.0;  }
 
-    public static double GetDistance(double lat1,double lon1, double lat2,double lon2) {
+    public static double GetDistance(double lat1,double lon1, double lat2,double lon2)
+    {
         double radLat1 = rad(lat1);
         double radLat2 = rad(lat2);
         double a = Math.abs(radLat1 - radLat2);
         double b = Math.abs(rad(lon1) - rad(lon2));
-        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2)+ Math.cos(radLat1)* Math.cos(radLat2)* Math.pow(Math.sin(b/2),2)));
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2)+Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
         s = s * EARTH_RADIUS;
-        s = (double) Math.round(s * 10000)/10;
+        s = (double)Math.round(s * 10000)/10;
         return s;
     }
     //===========計算兩經緯度之間距離 End ==========================================

@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import langotec.numberq.client.R;
 import langotec.numberq.client.adapter.RecyclerViewAdapter;
+import langotec.numberq.client.login.LoginActivity;
+import langotec.numberq.client.login.Member;
 import langotec.numberq.client.menu.Cart;
 import langotec.numberq.client.menu.CheckOutActivity;
 
@@ -85,7 +87,14 @@ public class CartFragment extends Fragment {
                     showDialog();
                     break;
                 case R.id.menu_cart_createOrder:
-                    startActivity(new Intent(getContext(), CheckOutActivity.class));
+                    if (Member.getInstance().checkLogin(getContext())) {
+                        startActivity(new Intent(getContext(), CheckOutActivity.class));
+                    }else {
+                        Intent intent = new Intent();
+                        intent.putExtra("startFrom", "fromCartFragment");
+                        intent.setClass(getContext(), LoginActivity.class);
+                        startActivity(intent);
+                    }
                     break;
             }
         }else
