@@ -11,17 +11,16 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 
 import langotec.numberq.client.dbConnect.StoreDBConn;
+import langotec.numberq.client.dbConnect.StoreDBConn_OkhttpEnqueue;
 
 public class WelcomeActivity extends AppCompatActivity{
 
@@ -32,15 +31,6 @@ public class WelcomeActivity extends AppCompatActivity{
     public static Double lat = null , lng = null;
     public LocationListener ll;
     private CountDownTimer timer;
-
-    //DBConn
-    private static final String MENU_SERVER =
-            "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
-    private static final String STORE_SERVER =
-            "https://flashmage.000webhostapp.com/query.php?p=pass&w=storeList&n=10";
-    private StoreDBConn search;
-    private MyHandler handler;
-    private ArrayList<Store> storeList = new ArrayList<>();
     private Context context;
 
     @Override
@@ -48,26 +38,8 @@ public class WelcomeActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         context = this;
+        GPSinitSetting();
 
-        //Location
-        // 取得定位服務的LocationManager物件
-        lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        // 檢查是否有啟用GPS
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // 顯示對話方塊啟用GPS
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.locationManager)
-                    .setMessage(R.string.locationMessage)
-                    .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // 使用Intent物件啟動設定程式來更改GPS設定
-                            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(i);
-                        }
-                    })
-                    .setNegativeButton(R.string.setNegativeButton, null).create().show();
-        }
     }
 
     @Override
@@ -88,15 +60,6 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
             Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
         }
-
-        //檢查版本和權限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        }
-
         countDownTimer();
     }
 
@@ -127,6 +90,56 @@ public class WelcomeActivity extends AppCompatActivity{
         }
     }
 
+    private void GPSinitSetting(){
+        //Location
+        //檢查版本和權限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        // 取得定位服務的LocationManager物件
+        lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // 檢查是否有啟用GPS
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            // 顯示對話方塊啟用GPS
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.locationManager)
+                    .setMessage(R.string.locationMessage)
+                    .setPositiveButton(R.string.setPositiveButton, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // 使用Intent物件啟動設定程式來更改GPS設定
+                            Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(i);
+                        }
+                    })
+                    .setNegativeButton(R.string.setNegativeButton, null).create().show();
+        }
+    }
+
+    private void countDownTimer(){
+        //計算10秒內沒衛星定位就用預設位置(台北車站)
+        timer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long l) {
+                Log.e("lat", String.valueOf(lat));
+                Log.e("lng", String.valueOf(lng));
+            }
+            @Override
+            public void onFinish() {
+                if (lat == null || lng == null){
+                    lat = 25.0451;
+                    lng = 121.517;
+                }
+                //DBConn
+                new StoreDBConn_OkhttpEnqueue(context, String.valueOf(lat),
+                        String.valueOf(lng)).okhttpConn();
+            }
+        }.start();
+    }
+
     private class MyLocationListener implements LocationListener {
         public void onLocationChanged(Location current) {
             if (current != null) {
@@ -143,73 +156,5 @@ public class WelcomeActivity extends AppCompatActivity{
         public void onProviderDisabled(String provider) {}
         public void onProviderEnabled(String provider) {}
         public void onStatusChanged(String provider, int status, Bundle extras) {}
-    }
-
-    private void countDownTimer(){
-        timer = new CountDownTimer(10000, 1000) {
-            @Override
-            public void onTick(long l) {
-                Log.e("lat", String.valueOf(lat));
-                Log.e("lat", String.valueOf(lng));
-            }
-
-            @Override
-            public void onFinish() {
-                if (lat == null || lng == null){
-                    lat = 121.517;
-                    lng = 25.0451;
-                }
-                //DBConn
-                Log.e("lat", String.valueOf(lat));
-                Log.e("lat", String.valueOf(lng));
-                if(handler == null) handler = new MyHandler();
-                search = new StoreDBConn();
-                search.query(handler, getFilesDir(), lat, lng);
-            }
-        }.start();
-    }
-    private class MyHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg){
-            Bundle db = msg.getData();
-            Boolean isConn = db.getBoolean("isConn");
-            Boolean isOk = db.getBoolean("isOk");
-            Log.e("storeSearch isOk", String.valueOf(isOk));
-            if(isConn){ // 網路已開啟
-                if(isOk) {
-                    storeList = search.getData();
-                    Log.e("store1", storeList.get(1).getBranchName());
-                    if (storeList.size() != 0) {
-                        startActivity(new Intent()
-                                .setClass(context, MainActivity.class)
-                                .putExtra("storeList",storeList));
-                        finish();
-                    }
-                }else{
-                    Log.e("DBConn","No Data");
-                }
-            }else{
-                // 連線失敗,未開啟網路
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(getString(R.string.connFail_noConn))
-                        .setCancelable(false)
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .setMessage(getString(R.string.connFail_check))
-                        .setPositiveButton(getString(R.string.connFail_retry), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                                search.query(handler, getFilesDir(), lat,lng);
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.connFail_quit), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .create().show();
-            }
-        }
     }
 }
