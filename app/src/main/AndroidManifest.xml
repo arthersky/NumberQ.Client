@@ -18,11 +18,12 @@
         android:minSdkVersion="15"/>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".WelcomeActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
@@ -32,14 +33,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".login.LoginActivity"></activity>
-        <activity android:name=".login.AccInfoActivity"></activity>
-        <activity android:name=".login.AccRegiActivity"></activity>
-        <activity android:name=".login.SendPassActivity"></activity>
-        <activity android:name=".menu.MenuActivity"></activity>
-        <activity android:name=".menu.SelectedActivity"></activity>
-        <activity android:name=".menu.CheckOutActivity"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTask"/>
+        <activity android:name=".login.LoginActivity"/>
+        <activity android:name=".login.AccInfoActivity"/>
+        <activity android:name=".login.AccRegiActivity"/>
+        <activity android:name=".login.SendPassActivity"/>
+        <activity android:name=".menu.MenuActivity"/>
+        <activity android:name=".menu.SelectedActivity"/>
+        <activity
+            android:name=".menu.CheckOutActivity"
+            android:launchMode="singleInstance"/>
         <activity
             android:name="langotec.numberq.client.map.Activity_GoogleMap"
             android:label="@string/title_activity_googlemap"

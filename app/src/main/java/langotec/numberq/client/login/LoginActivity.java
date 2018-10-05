@@ -119,18 +119,11 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     dialogInterface.dismiss();
+                                    loginSuccessGoTo();
                                 }
                             })
                             .create().show();
-                    Member member = user.getData();
-                    Intent intent = new Intent();
-                    intent.putExtra("User", member);
-                    if (startFrom != null && startFrom.equals("fromCartFragment"))
-                        intent.setClass(context, CheckOutActivity.class);
-                    else
-                        intent.setClass(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+
                 } else {  // 使用者未註冊
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("登入")
@@ -158,5 +151,19 @@ public class LoginActivity extends AppCompatActivity {
                         .create().show();
             }
         }
+    }
+
+    private void loginSuccessGoTo(){
+        Intent intent = new Intent();
+        if (startFrom != null && startFrom.equals("fromCartFragment")) {
+            intent.putExtra("User", user.getData());
+            intent.setClass(context, CheckOutActivity.class);
+        }
+        else{
+            intent.putExtra("startFrom", "fromLoginActivity");
+            intent.setClass(context, MainActivity.class);
+        }
+        startActivity(intent);
+        finish();
     }
 }

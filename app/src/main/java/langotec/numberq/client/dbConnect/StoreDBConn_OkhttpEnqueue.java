@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -20,15 +18,12 @@ import java.util.ArrayList;
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.Store;
-import langotec.numberq.client.WelcomeActivity;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static langotec.numberq.client.WelcomeActivity.lat;
 
 public class StoreDBConn_OkhttpEnqueue {
 
@@ -73,7 +68,8 @@ public class StoreDBConn_OkhttpEnqueue {
                 // 連線成功
                 if (response.code() == 200) {   // response.code() return the HTTP status
                     qResult = response.body().string().trim();
-                    Log.e("storeDBQuery_qResult", qResult + "");
+//                    Log.e("storeDBQuery_qResult", qResult + "");
+                    Log.e("storeDBQuery_qResult","qResult OK");
                     if (qResult.equals("no record")) {
                         // enqueue時是在background Thread上，無法直接叫用main Thread
                         ((Activity)context).runOnUiThread(new Runnable() {
@@ -83,7 +79,6 @@ public class StoreDBConn_OkhttpEnqueue {
                             }
                         });
                     } else{
-
                         Log.e("storeDBQuery_Start", "MainActivity");
                         Intent intent = new Intent();
                         intent.putExtra("storeList", parseJSON(qResult));
@@ -134,14 +129,14 @@ public class StoreDBConn_OkhttpEnqueue {
 
     private ArrayList<Store> parseJSON(String s) {
         Log.e("jsonArray","Enter parseJSON");
-        Log.e("jsonArray", s);
+//        Log.e("jsonArray", s);
         try {
             JSONArray jsArray = new JSONArray(s);
-            Log.e("jsonArray", String.valueOf(jsArray.length()));
-            Log.e("jsonArray", String.valueOf(jsArray.get(0)));
+            Log.e("jsonArray", "jsArray.length:"+String.valueOf(jsArray.length()));
+//            Log.e("jsonArray", "jsArray.get(0):"+String.valueOf(jsArray.get(0)));
             for (int i=0; i<jsArray.length(); i++) {
                 JSONObject jsObj = jsArray.getJSONObject(i);
-                Log.e("jsobj", String.valueOf(jsObj));
+//                Log.e("jsobj", String.valueOf(jsObj));
                 String HeadName = jsObj.getString("HeadName");
                 String headImg = jsObj.getString("HeadImg");
                 int id = Integer.parseInt(jsObj.getString("id"));
