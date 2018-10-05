@@ -54,14 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         //take data bundle
         try{
-//            Bundle data = getIntent().getExtras();
-//            if (lat == 0.0){
-//                lat = data.getDouble("lat");
-//            }
-//            if (lng == 0.0){
-//                lng = data.getDouble("lng");
-//            }
-//            Log.e("Location","Lat:"+lat+" Lng:"+lng);
             if (storeList == null){
                 try{
                     storeList = new ArrayList<>();
@@ -74,7 +66,35 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             Log.e("TAG",e.toString());
         }
+        setupViewPager();
+    }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.menu_backHome).setVisible(false);
+        menu.findItem(R.id.menu_cart_clear).setVisible(false);
+        menu.findItem(R.id.menu_cart_createOrder).setVisible(false);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    private void setupViewPager() {
         //Initializing the bottomNavigationView
         bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
         BottomNavigationViewHelper.removeShiftMode(bottomNavigationView);
@@ -84,16 +104,16 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.action_recommend:
-                                viewPager.setCurrentItem(0);
+                                MainActivity.this.viewPager.setCurrentItem(0);
                                 break;
                             case R.id.action_order:
-                                viewPager.setCurrentItem(1);
+                                MainActivity.this.viewPager.setCurrentItem(1);
                                 break;
                             case R.id.action_cart:
-                                viewPager.setCurrentItem(2);
+                                MainActivity.this.viewPager.setCurrentItem(2);
                                 break;
                             case R.id.action_more:
-                                viewPager.setCurrentItem(3);
+                                MainActivity.this.viewPager.setCurrentItem(3);
                                 break;
                         }
                         return false;
@@ -105,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
             @Override
             public void onPageSelected(int position) {
@@ -140,29 +158,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
+            public void onPageScrollStateChanged(int state) {}
         });
-        setupViewPager(viewPager);
-        //如果是由修改購物車數量啟動MainActivity，需跳轉回到購物車頁面
-        String extra = (String) getIntent().getStringExtra("from");
-        if(extra != null && extra.equals("fromSelectActivity")) {
-            viewPager.setCurrentItem(2);
-        }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         recommendFragment =new RecommendFragment();
@@ -176,20 +174,21 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(moreFragment);
 
         viewPager.setAdapter(adapter);
-    }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.menu_backHome).setVisible(false);
-        menu.findItem(R.id.menu_cart_clear).setVisible(false);
-        menu.findItem(R.id.menu_cart_createOrder).setVisible(false);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main,menu);
-        return super.onCreateOptionsMenu(menu);
+        //如果是由修改購物車數量啟動MainActivity，需跳轉回到購物車頁面
+        String extra = (String) getIntent().getStringExtra("from");
+        if(extra != null) {
+            switch (extra) {
+                case "fromSelectActivity":
+                    viewPager.setCurrentItem(2);
+                    break;
+                case "fromLoginActivity":
+                    viewPager.setCurrentItem(3);
+                    break;
+                default:
+                    viewPager.setCurrentItem(0);
+                    break;
+            }
+        }
     }
 }

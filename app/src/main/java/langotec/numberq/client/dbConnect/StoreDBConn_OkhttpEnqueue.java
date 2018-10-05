@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -20,15 +18,12 @@ import java.util.ArrayList;
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.Store;
-import langotec.numberq.client.WelcomeActivity;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static langotec.numberq.client.WelcomeActivity.lat;
 
 public class StoreDBConn_OkhttpEnqueue {
 
@@ -84,7 +79,6 @@ public class StoreDBConn_OkhttpEnqueue {
                             }
                         });
                     } else{
-
                         Log.e("storeDBQuery_Start", "MainActivity");
                         Intent intent = new Intent();
                         intent.putExtra("storeList", parseJSON(qResult));

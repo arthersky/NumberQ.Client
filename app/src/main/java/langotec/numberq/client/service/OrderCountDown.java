@@ -1,4 +1,4 @@
-package langotec.numberq.client.Service;
+package langotec.numberq.client.service;
 
 import android.app.Service;
 import android.content.Intent;
