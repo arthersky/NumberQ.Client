@@ -9,22 +9,25 @@
         android:orderInCategory="0"
         app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/menu_backHome"
-        android:title="@string/menuItem_home"
-        android:icon="@drawable/home"
+    <item
+        android:id="@+id/menu_backHome"
+        android:icon="@drawable/ic_store_black_24dp"
         android:orderInCategory="1"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/menuItem_home"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/menu_cart_createOrder"
-        android:title="@string/menuItem_createOrder"
-        android:icon="@drawable/createorder"
+    <item
+        android:id="@+id/menu_cart_createOrder"
+        android:icon="@drawable/ic_shopping_basket_white_24dp"
         android:orderInCategory="2"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/menuItem_createOrder"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/menu_cart_clear"
-        android:title="@string/menuItem_clearAll"
-        android:icon="@drawable/removecart"
+    <item
+        android:id="@+id/menu_cart_clear"
+        android:icon="@drawable/ic_remove_shopping_cart_black_24dp"
         android:orderInCategory="3"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/menuItem_clearAll"
+        app:showAsAction="ifRoom" />
 
 </menu>
