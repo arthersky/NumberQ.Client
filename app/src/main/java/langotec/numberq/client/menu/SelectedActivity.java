@@ -55,8 +55,8 @@ public class SelectedActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        cart.saveCartFile(context);
         System.gc();
-        cart.saveCart(context);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class SelectedActivity extends AppCompatActivity {
             //如果是從購物車畫面進入修改數量，要處理修改完跳回購物車，及刪除/新增Cart的內容
         else if (menu.getFrom().equals("fromCartFragment")){
             intent.setClass(context, MainActivity.class);
-            intent.putExtra("from", "fromSelectActivity");
+            intent.putExtra("currentPage", 2);
             startActivity(intent);
             for (int i = 0 ; i < cart.size(); i++){
                 if (cart.get(i).getFrom().equals("fromCartFragment")){

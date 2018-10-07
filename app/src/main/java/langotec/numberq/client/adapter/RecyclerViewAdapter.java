@@ -20,7 +20,7 @@ import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.Store;
 import langotec.numberq.client.dbConnect.MenuDBConn;
-import langotec.numberq.client.fragment.CartFragment;
+import langotec.numberq.client.menu.Cart;
 import langotec.numberq.client.menu.Menu;
 import langotec.numberq.client.menu.SelectedActivity;
 
@@ -40,7 +40,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             view = LayoutInflater.from(viewGroup.getContext()).inflate(
                     R.layout.cardview_store, viewGroup, false);
 
-        }else if (data.get(0) instanceof Menu){
+        }else if (data instanceof Cart){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(
                     R.layout.cardview_cart, viewGroup, false);
         }
@@ -50,14 +50,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(ViewHolder viewHolder,
+                                 @SuppressLint("RecyclerView") final int position) {
         View view = viewHolder.view;
         context = view.getContext();
 
         if (data.get(0) instanceof Store) {
-//            final String data = (String) this.data.get(position);
             final Store store = (Store) data.get(position);
-//            ArrayList StoreList = ;
             TextView textStoreName = (TextView) view.findViewById(R.id.textView1);
             TextView textBranchName = (TextView) view.findViewById(R.id.textView2);
             TextView textNumber = (TextView)view.findViewById(R.id.textView4);
@@ -84,7 +83,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             textBranchName.setText(store.getBranchName());
         }
 
-        else if (data.get(position) instanceof Menu){
+        else if (data instanceof Cart){
             Menu menu = (Menu) data.get(position);
 
             ImageView cartIconImage = (ImageView) view.findViewById(R.id.cart_imageView);
@@ -127,7 +126,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         public View view;
 
-        public ViewHolder(View view){
+        ViewHolder(View view){
             super(view);
             this.view = view;
         }
@@ -144,15 +143,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             public void onClick(DialogInterface dialog, int which) {
                                 //移除Cart內選定的商品
                                 data.remove(position);
-
-                                //更新Adapter的畫面
-                                RecyclerViewAdapter.this.notifyDataSetChanged();
-
-                                //更新CartFragment的畫面
-                                CartFragment cartFragment = MainActivity.cartFragment;
-                                android.support.v4.app.FragmentTransaction ft =
-                                        cartFragment.getFragmentManager().beginTransaction();
-                                ft.detach(cartFragment).attach(cartFragment).commit();
+                                notifyDataSetChanged();
+                                MainActivity.cartFragment.refreshCart();
                             }
                         })
                 .setNegativeButton(context.getResources().getString(R.string.cart_modifyQuantity),
@@ -164,7 +156,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                                 Intent intent = new Intent();
                                 intent.putExtra("Menu", menu);
                                 intent.setClass(context, SelectedActivity.class);
-                                ((Activity)context).startActivity(intent);
+                                context.startActivity(intent);
                             }
                         })
                 .setNeutralButton(context.getResources().getString(R.string.menu_cancel),
@@ -175,6 +167,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             }
                         }).create().show();
     }
-
 }
 

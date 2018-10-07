@@ -103,8 +103,8 @@ public class MoreFragment extends Fragment {
             Bundle bd = msg.getData();
             Boolean isOk = bd.getBoolean("isOk");
             Boolean isConn = bd.getBoolean("isConn");
-            Log.e("login.isOk", String.valueOf(isOk));
-            Log.e("login.isConn", String.valueOf(isConn));
+//            Log.e("login.isOk", String.valueOf(isOk));
+//            Log.e("login.isConn", String.valueOf(isConn));
             loading.dismiss();
             if (isConn && isOk) { //連線成功
                 // 使用者已註冊

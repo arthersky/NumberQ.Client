@@ -15,7 +15,7 @@ public class ReadFile {
     private File dir;
     private Member member;
     public ReadFile(File dir, String myfile, Member member){
-        Log.e("readFile", "dir:" + dir + "/" + myfile + "   member:"+member.toString());
+//        Log.e("readFile", "dir:" + dir + "/" + myfile + "   member:"+member.toString());
         this.dir = dir;
         this.myfile = myfile;
         this.member = member;
@@ -49,7 +49,7 @@ public class ReadFile {
                 } catch(IOException e){  }
             }
             final String result = sb.toString().trim();
-            Log.e("result", result);
+//            Log.e("result", result);
             if(result.equals("no record")){
                 return false;
             }else{

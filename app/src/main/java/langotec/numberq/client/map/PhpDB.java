@@ -123,6 +123,10 @@ public class PhpDB extends Application implements Runnable
         final String phpSQLstoreSearchByName = context.getResources().getString(R.string.phpSQLstoreSearchByName); //商店搜尋
         final String phpSQLuserList = context.getResources().getString(R.string.phpSQLuserList); //人員清單
         final String phpSQLuserSearchByEMAIL = context.getResources().getString(R.string.phpSQLuserSearchByEMAIL); //Email人員搜尋
+        final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
+        final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
+        final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
+        final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
 
         //設定用參數
         final String phpSQLNumDefault  = context.getResources().getString(R.string.phpSQLNumDefault); //預設資料筆數
@@ -212,8 +216,8 @@ public class PhpDB extends Application implements Runnable
 
         public void setPairNumLimit(int num) //列出筆數 0抓預設 小於0 移除
         {  if (num >0 ) setPair(phpSQLNumLimit,""+num);
-        else if (num == 0) setPair(phpSQLNumLimit,phpSQLNumDefault);
-        else removePair(phpSQLNumLimit); }
+            else if (num == 0) setPair(phpSQLNumLimit,phpSQLNumDefault);
+            else removePair(phpSQLNumLimit); }
 
         public void setPairFunction(String WorkFunction)  //呼叫功能
         {
@@ -222,7 +226,7 @@ public class PhpDB extends Application implements Runnable
 
         public void setPairShowColName(boolean ShowColName)  //顯示欄位
         { if(ShowColName) setPair(phpSQLShowColumns,"true");
-        else setPair(phpSQLShowColumns,"false"); }
+          else setPair(phpSQLShowColumns,"false"); }
 
         public void setPairLatLng(double lat,double lng){
             if(lat ==0) setPair(phpSQLLat,phpSQLLatDefault); //Lat

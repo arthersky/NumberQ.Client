@@ -36,24 +36,10 @@ public class MenuActivity extends AppCompatActivity {
     private void setLayout() {
         ListView listView = findViewById(R.id.list);
         ArrayList<Menu> menus = (ArrayList) getIntent().getSerializableExtra("menuList");
-
         setTitle(menus.get(0).getHeadName() + " - " + menus.get(0).getBranchName());
-
         listView.setEmptyView(findViewById(R.id.emptyView));
-
         MenuBaseAdapter adapter = new MenuBaseAdapter(context, menus);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Menu menu = (Menu) adapterView.getItemAtPosition(i);
-                Intent intent = new Intent();
-                //把被按下的Menu物件放進intent
-                intent.putExtra("Menu", menu);
-                intent.setClass(context, SelectedActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
@@ -76,11 +62,10 @@ public class MenuActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_backHome:
-                System.gc();
                 startActivity(new Intent(context, MainActivity.class));
+                System.gc();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

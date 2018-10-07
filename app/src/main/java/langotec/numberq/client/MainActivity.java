@@ -1,8 +1,10 @@
 package langotec.numberq.client;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,15 +23,9 @@ import langotec.numberq.client.fragment.RecommendFragment;
 
 
 public class MainActivity extends AppCompatActivity {
-    //location
-    double lat = 0.0;
-    double lng = 0.0;
 
     //store array
     public static ArrayList<Store> storeList;
-
-    //title Array
-    private String[] titles;
 
     //BottomNavigationView
     private BottomNavigationView bottomNavigationView;
@@ -66,7 +62,33 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             Log.e("TAG",e.toString());
         }
+
+    }
+
+    //Override onNewIntent才可以從onResume抓到最新Intent
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentPage", viewPager.getCurrentItem());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         setupViewPager();
+        viewPager.setCurrentItem(getIntent().getIntExtra("currentPage", 0));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getIntent().putExtra("currentPage", viewPager.getCurrentItem());
     }
 
     @Override
@@ -84,19 +106,23 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
     private void setupViewPager() {
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        recommendFragment = new RecommendFragment();
+        orderFragment = new OrderFragment();
+        cartFragment = new CartFragment();
+        moreFragment = new MoreFragment();
+
+        adapter.addFragment(recommendFragment);
+        adapter.addFragment(orderFragment);
+        adapter.addFragment(cartFragment);
+        adapter.addFragment(moreFragment);
+
+        viewPager.setAdapter(adapter);
         //Initializing the bottomNavigationView
-        bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         BottomNavigationViewHelper.removeShiftMode(bottomNavigationView);
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -121,74 +147,44 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         //Initializing viewPager
-        titles = getResources().getStringArray(R.array.page_indicators);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        final String[] TITLES = getResources().getStringArray(R.array.page_indicators);
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
             @Override
             public void onPageSelected(int position) {
                 if (prevMenuItem != null) {
                     prevMenuItem.setChecked(false);
-                }
-                else
-                {
+                } else {
                     bottomNavigationView.getMenu().getItem(0).setChecked(false);
                 }
-                Log.d("page", "onPageSelected: "+position);
+                Log.d("page", "onPageSelected: " + position);
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
                 prevMenuItem = bottomNavigationView.getMenu().getItem(position);
 
                 //設定頁面標題
-                switch (position){
+                switch (position) {
                     case 0:
-                        setTitle(titles[position]);
+                        setTitle(TITLES[position]);
                         break;
                     case 1:
-                        setTitle(titles[position]);
+                        setTitle(TITLES[position]);
                         break;
                     case 2:
-                        setTitle(titles[position]);
+                        setTitle(TITLES[position]);
                         break;
                     case 3:
-                        setTitle(titles[position]);
+                        setTitle(TITLES[position]);
                         break;
                 }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {}
-        });
-
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        recommendFragment =new RecommendFragment();
-        orderFragment =new OrderFragment();
-        cartFragment =new CartFragment();
-        moreFragment = new MoreFragment();
-
-        adapter.addFragment(recommendFragment);
-        adapter.addFragment(orderFragment);
-        adapter.addFragment(cartFragment);
-        adapter.addFragment(moreFragment);
-
-        viewPager.setAdapter(adapter);
-
-        //如果是由修改購物車數量啟動MainActivity，需跳轉回到購物車頁面
-        String extra = (String) getIntent().getStringExtra("from");
-        if(extra != null) {
-            switch (extra) {
-                case "fromSelectActivity":
-                    viewPager.setCurrentItem(2);
-                    break;
-                case "fromLoginActivity":
-                    viewPager.setCurrentItem(3);
-                    break;
-                default:
-                    viewPager.setCurrentItem(0);
-                    break;
+            public void onPageScrollStateChanged(int state) {
             }
-        }
+        });
     }
 }

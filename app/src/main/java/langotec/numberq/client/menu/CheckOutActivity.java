@@ -28,9 +28,14 @@ public class CheckOutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
         context  = this;
         cart = Cart.getInstance(context);
-        orderList = new ArrayList<>();
-        makeOrders();
+        orderList = makeOrders();
         setLayout();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        cart.saveCartFile(context);
     }
 
     @Override
@@ -53,8 +58,10 @@ public class CheckOutActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_backHome:
+                Intent intent = new Intent(context, MainActivity.class);
+                intent.putExtra("currentPage", 2);
+                startActivity(intent);
                 System.gc();
-                startActivity(new Intent(context, MainActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -67,7 +74,7 @@ public class CheckOutActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
     }
 
-    private void makeOrders(){
+    private ArrayList<Order> makeOrders(){
         HashMap<String, Order> orderMap = new HashMap<>();
         //先加入第0筆cart資料進入HashMap(用Map純粹為了方便比較key)
         orderMap.put(cart.get(0).getHeadName() + cart.get(0).getBranchName(), new Order());
@@ -91,10 +98,7 @@ public class CheckOutActivity extends AppCompatActivity {
                 }
             }
         }
-        Log.e("orderList Total", orderMap.size()+"");
-        for (Order o : orderMap.values()){
-            orderList.add(o);
-        }
+        return new ArrayList<>(orderMap.values());
     }
 
     public void onCheckOutClick(View view){

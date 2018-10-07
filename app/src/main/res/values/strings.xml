@@ -78,6 +78,10 @@
     <string name="phpSQLLngDefault">121.33.55.79</string>
     <string name="title_activity_pay_select">選擇支付方式</string>
     <string name="title_activity_googlemap">餐廳位置查詢"</string>
+    <string name="phpSQLorderList">orderList</string>
+    <string name="phpSQLsetOrderUpdate">setOrderUpdate</string>
+    <string name="phpSQLgetOrderNewId">getOrderNewId</string>
+    <string name="phpSQLorderMSList">orderMSList</string>
 
     <string name="menu_app_name">NumberQ_Menu</string>
     <string name="menu_no_record">No record!</string>
@@ -117,6 +121,8 @@
     <string name="checkOut_title">我的訂單內容</string>
     <string name="checkOut_use">使用</string>
     <string name="checkOut_check">結帳</string>
+    <string name="checkOut_click">長按即可修改訂單</string>
+    <string name="checkOut_delete">刪除這筆訂單</string>
 
     <string name="connFail_noConn">目前無法連線</string>
     <string name="connFail_check">請檢查您的網路設定，謝謝您</string>

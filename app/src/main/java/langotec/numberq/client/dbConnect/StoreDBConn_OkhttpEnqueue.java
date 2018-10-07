@@ -44,8 +44,6 @@ public class StoreDBConn_OkhttpEnqueue {
         final Context context = activityReference.get();
         OkHttpClient okHttpClient = new OkHttpClient();
         // FormBody放要傳的參數和值
-        Log.e("storeDBQuery_lat", lat);
-        Log.e("storeDBQuery_lng", lng);
         FormBody formBody = new FormBody.Builder()
                 .add("p", "pass")
                 .add("w", "storeList")
@@ -68,8 +66,6 @@ public class StoreDBConn_OkhttpEnqueue {
                 // 連線成功
                 if (response.code() == 200) {   // response.code() return the HTTP status
                     qResult = response.body().string().trim();
-//                    Log.e("storeDBQuery_qResult", qResult + "");
-                    Log.e("storeDBQuery_qResult","qResult OK");
                     if (qResult.equals("no record")) {
                         // enqueue時是在background Thread上，無法直接叫用main Thread
                         ((Activity)context).runOnUiThread(new Runnable() {
@@ -79,12 +75,10 @@ public class StoreDBConn_OkhttpEnqueue {
                             }
                         });
                     } else{
-                        Log.e("storeDBQuery_Start", "MainActivity");
                         Intent intent = new Intent();
                         intent.putExtra("storeList", parseJSON(qResult));
                         intent.setClass(context, MainActivity.class);
                         context.startActivity(intent);
-                        ((Activity)context).finish();
                     }
                     response.close();
                 }
@@ -107,6 +101,7 @@ public class StoreDBConn_OkhttpEnqueue {
         Context context = activityReference.get();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.connFail_noConn))
+                .setCancelable(false)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setMessage(context.getString(R.string.connFail_check))
                 .setPositiveButton(context.getString(R.string.connFail_retry),
@@ -128,15 +123,10 @@ public class StoreDBConn_OkhttpEnqueue {
     }
 
     private ArrayList<Store> parseJSON(String s) {
-        Log.e("jsonArray","Enter parseJSON");
-//        Log.e("jsonArray", s);
         try {
             JSONArray jsArray = new JSONArray(s);
-            Log.e("jsonArray", "jsArray.length:"+String.valueOf(jsArray.length()));
-//            Log.e("jsonArray", "jsArray.get(0):"+String.valueOf(jsArray.get(0)));
             for (int i=0; i<jsArray.length(); i++) {
                 JSONObject jsObj = jsArray.getJSONObject(i);
-//                Log.e("jsobj", String.valueOf(jsObj));
                 String HeadName = jsObj.getString("HeadName");
                 String headImg = jsObj.getString("HeadImg");
                 int id = Integer.parseInt(jsObj.getString("id"));

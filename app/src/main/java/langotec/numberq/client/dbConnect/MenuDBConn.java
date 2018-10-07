@@ -76,11 +76,6 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
             if (response.isSuccessful() && response.code() == 200) {
                 //同步方式下得到返回结果
                 qResult = response.body().string().trim();
-                if (qResult.equals("no record")) {
-                    Log.d("OkHttp result", "no record");
-                } else {
-                    Log.d("OkHttp result", qResult + "");
-                }
                 response.close();
             } else {
                 Log.e("failed", " no Data!");
@@ -123,16 +118,11 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     }
 
     private ArrayList<Menu> parseJSON() {
-//        Log.e("jsonArray", "Enter parseJSON");
-//        Log.e("jsonArray", qResult);
         try {
             JSONArray jsArray = new JSONArray(qResult);
-//            Log.e("jsonArray", String.valueOf(jsArray.length()));
-            Log.e("jsonArray", String.valueOf(jsArray.get(0)));
             for (int i = 0; i < jsArray.length(); i++) {
                 JSONObject jsObj = jsArray.getJSONObject(i);
                 String HeadName = jsObj.getString("HeadName");
-//                String BranchName = jsObj.get("BranchName")
                 String HeadId = jsObj.getString("HeadId");
                 String productId = jsObj.getString("productId");
                 String productType = jsObj.getString("productType");

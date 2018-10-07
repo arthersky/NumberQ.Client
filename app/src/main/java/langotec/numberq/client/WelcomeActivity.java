@@ -124,8 +124,8 @@ public class WelcomeActivity extends AppCompatActivity{
         timer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long l) {
-                Log.e("lat", String.valueOf(lat));
-                Log.e("lng", String.valueOf(lng));
+//                Log.e("lat", String.valueOf(lat));
+//                Log.e("lng", String.valueOf(lng));
             }
             @Override
             public void onFinish() {
@@ -136,6 +136,7 @@ public class WelcomeActivity extends AppCompatActivity{
                 //DBConn
                 new StoreDBConn_OkhttpEnqueue(context, String.valueOf(lat),
                         String.valueOf(lng)).okhttpConn();
+                lm.removeUpdates(ll);
             }
         }.start();
     }

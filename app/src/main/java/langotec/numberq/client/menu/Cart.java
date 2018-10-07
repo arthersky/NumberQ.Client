@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class Cart extends ArrayList<Menu> implements Serializable {
 
     private static final String CART_NAME = "cartData";
-
     //一位消費者應只有一台購物車，所以使用singleton模式
     private volatile static Cart singletonCart;
     //不讓外部呼叫建構式
@@ -25,7 +24,6 @@ public class Cart extends ArrayList<Menu> implements Serializable {
     public static Cart getInstance(Context context){
         //先檢查是否已經有購物車的存檔，如果有就讀出來回傳
         if (hadCartFile(context)){
-            Log.e("hadcartfile", "true");
             File fileDir = new File(String.valueOf(context.getFilesDir()) +
                     "/" + CART_NAME);
             try {
@@ -53,7 +51,18 @@ public class Cart extends ArrayList<Menu> implements Serializable {
         return singletonCart;
     }
 
-    public void saveCart(Context context){
+    private static boolean hadCartFile(Context context){
+        File fileDir = new File(String.valueOf(context.getFilesDir()));
+        String[] existingFiles = fileDir.list();
+        for (String file : existingFiles){
+            //如果已經有此檔案就離開method不再新增檔案
+            if (file.equals(CART_NAME))
+                return true;
+        }
+        return false;
+    }
+
+    public void saveCartFile(Context context){
         if (this.size() > 0) {
             //儲存在data/data/packageName/files/cartData
             File fileDir = new File(String.valueOf(context.getFilesDir()) +
@@ -67,16 +76,5 @@ public class Cart extends ArrayList<Menu> implements Serializable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static boolean hadCartFile(Context context){
-        File fileDir = new File(String.valueOf(context.getFilesDir()));
-        String[] existingFiles = fileDir.list();
-        for (String file : existingFiles){
-            //如果已經有此檔案就離開method不再新增檔案
-            if (file.equals(CART_NAME))
-                return true;
-        }
-        return false;
     }
 }
