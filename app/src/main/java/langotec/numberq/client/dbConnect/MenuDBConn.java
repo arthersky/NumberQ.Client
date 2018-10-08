@@ -27,7 +27,7 @@ import okhttp3.Response;
 public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String qResult = "no record";
     private String headName, branchName;
-    private LoadingDialog loadingDialog;
+    public LoadingDialog loadingDialog;
     private WeakReference<Context> activityReference;
     private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";

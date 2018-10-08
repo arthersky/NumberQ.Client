@@ -57,6 +57,7 @@ public class SelectedActivity extends AppCompatActivity {
         super.onPause();
         cart.saveCartFile(context);
         System.gc();
+        finish();
     }
 
     @Override

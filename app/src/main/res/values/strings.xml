@@ -56,6 +56,14 @@
     <string name="phpSQLShowColumns">"cv"</string>
     <string name="phpSQLuserSearchByEMAIL">"userSearchByEMAIL"</string>
     <string name="phpSQLstoreSearchByName">storeSearchByName</string>
+    <string name="phpSQLstoreProductList">storeProductList</string>
+    <string name="phpSQLdelOrder">delOrder</string>
+    <string name="phpSQLnewOrderSub">newOrderSub</string>
+    <string name="phpSQLsetOrderSub">setOrderSub</string>
+    <string name="phpSQLdelOrderSub">delOrderSub</string>
+
+    phpSQLnewOrderSub
+    phpSQLnewOrderSub
     <string name="phpSQLSearch1">s</string>
     <string name="phpSQLSearch2">s2</string>
     <string name="phpSQLSearch3">s3</string>

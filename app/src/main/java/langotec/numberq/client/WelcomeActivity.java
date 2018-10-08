@@ -17,9 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-
-import langotec.numberq.client.dbConnect.StoreDBConn;
 import langotec.numberq.client.dbConnect.StoreDBConn_OkhttpEnqueue;
 
 public class WelcomeActivity extends AppCompatActivity{
@@ -32,6 +29,7 @@ public class WelcomeActivity extends AppCompatActivity{
     public LocationListener ll;
     private CountDownTimer timer;
     private Context context;
+    private StoreDBConn_OkhttpEnqueue storeDBConn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +37,6 @@ public class WelcomeActivity extends AppCompatActivity{
         setContentView(R.layout.activity_welcome);
         context = this;
         GPSinitSetting();
-
     }
 
     @Override
@@ -60,6 +57,7 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
             Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
         }
+        storeDBConn = new StoreDBConn_OkhttpEnqueue(context);
         countDownTimer();
     }
 
@@ -73,6 +71,9 @@ public class WelcomeActivity extends AppCompatActivity{
             Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
             Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
         }
+        timer.cancel();
+        if (storeDBConn.call != null && storeDBConn.call.isExecuted())
+            storeDBConn.call.cancel();
         finish();
     }
 
@@ -124,8 +125,8 @@ public class WelcomeActivity extends AppCompatActivity{
         timer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long l) {
-//                Log.e("lat", String.valueOf(lat));
-//                Log.e("lng", String.valueOf(lng));
+                Log.e("lat", String.valueOf(lat));
+                Log.e("lng", String.valueOf(lng));
             }
             @Override
             public void onFinish() {
@@ -134,8 +135,8 @@ public class WelcomeActivity extends AppCompatActivity{
                     lng = 121.517;
                 }
                 //DBConn
-                new StoreDBConn_OkhttpEnqueue(context, String.valueOf(lat),
-                        String.valueOf(lng)).okhttpConn();
+                storeDBConn.setLatLng(String.valueOf(lat), String.valueOf(lng));
+                storeDBConn.okhttpConn();
                 lm.removeUpdates(ll);
             }
         }.start();

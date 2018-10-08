@@ -116,7 +116,8 @@ public class CartFragment extends Fragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //清除購物車內資料，及更新CartFragment畫面
                                 cart.clear();
-                                refreshCart();
+                                getFragmentManager().beginTransaction().
+                                    detach(CartFragment.this).attach(CartFragment.this).commit();
                             }
                         })
                 .setNegativeButton(getString(R.string.menu_cancel),
@@ -127,9 +128,5 @@ public class CartFragment extends Fragment {
                             }
                         })
                 .create().show();
-    }
-
-    public void refreshCart(){
-        this.getFragmentManager().beginTransaction().detach(this).attach(this).commit();
     }
 }

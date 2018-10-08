@@ -28,6 +28,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     //先用ArrayList拿東西進來再轉型
     private ArrayList data;
     private Context context;
+    public MenuDBConn menuDBConn;
 
     public RecyclerViewAdapter(ArrayList data) {
         this.data = data;
@@ -67,8 +68,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new MenuDBConn(((Store) data.get(position)).getHeadName(),
-                            ((Store) data.get(position)).getBranchName(), context).execute();
+                    menuDBConn = new MenuDBConn(((Store) data.get(position)). getHeadName(),
+                            ((Store) data.get(position)).getBranchName(), context);
+                    menuDBConn.execute();
                 }
             });
 
@@ -144,7 +146,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                                 //移除Cart內選定的商品
                                 data.remove(position);
                                 notifyDataSetChanged();
-                                MainActivity.cartFragment.refreshCart();
+                                Intent intent = new Intent(context, MainActivity.class);
+                                intent.putExtra("currentPage", 2);
+                                context.startActivity(intent);
                             }
                         })
                 .setNegativeButton(context.getResources().getString(R.string.cart_modifyQuantity),
@@ -153,9 +157,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 Menu menu = (Menu) data.get(position);
                                 menu.setFrom("fromCartFragment");
-                                Intent intent = new Intent();
+                                Intent intent = new Intent(context, SelectedActivity.class);
                                 intent.putExtra("Menu", menu);
-                                intent.setClass(context, SelectedActivity.class);
                                 context.startActivity(intent);
                             }
                         })

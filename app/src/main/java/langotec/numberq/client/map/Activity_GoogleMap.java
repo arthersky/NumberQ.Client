@@ -65,8 +65,9 @@ public class Activity_GoogleMap extends AppCompatActivity {
     private Button bt1; private Button bt2; private Button bt3;
     private ProgressBar progressBar;
     Context context;
-    double lat, lng;
-    double tlat,tlng;
+    boolean bLoc = false;
+    double lat=-1, lng=-1;
+    double tlat=-1,tlng=-1;
     boolean showRecycleView=true;
     private LocationManager locationManager;
     private MyLocationListener myLocationListener;
@@ -144,14 +145,33 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         //取得上一頁傳來命令 work=1 附近定位
         Bundle bundle = getIntent().getExtras();
-        if (bundle.getInt("work") == FUNCTION_STORENEAR)
+
+        //取出上次位置 上一頁有傳過來則使用
+        if (bundle.getDouble("lat") == 0 || bundle.getDouble("lng") == 0 )
         {
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            lat = location.getLatitude();
+            lng = location.getLongitude();
+            Log.e("上次經緯度資料","Lat:" + lat+" lng:"+lng);
+        }else{
+            lat =bundle.getDouble("lat");
+            lng =bundle.getDouble("lng");
+            Log.e("使用上一頁傳來經緯度資料","Lat:" + lat+" lng:"+lng);
+        }
+        moveToCurrentLocation();
+
+        //取得上一頁傳來命令 work=1 附近定位
+        if (bundle.getInt("work") == FUNCTION_STORENEAR) {
+            bLoc = true;
+            Log.e("onCreate","執行上一頁傳來搜尋附近店家命令");
             functionWork = FUNCTION_STORENEAR;
-            refresh_Record(10,FUNCTION_STORENEAR,false);
-        }else if (bundle.getInt("work") == FUNCTION_STORESEARCH){
-            searchString = bundle.getString("searchString");
-            functionWork = FUNCTION_STORESEARCH;
-            refresh_Record(10, FUNCTION_STORESEARCH, true);
+            refresh_Record(10, FUNCTION_STORENEAR, false);
+
+        }else{
+            fab.setEnabled(false);
+            fab.startAnimation(animation); //開始動畫
+            bLoc = false;
+
         }
     }
 
@@ -253,6 +273,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 //附近店家
                 case R.id.gmap_button1:
                     Log.e("button1","button1");
+                    bLoc =false;
                     if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
                     {
                         mRecyclerView.setVisibility(View.INVISIBLE);
@@ -267,6 +288,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 //所有店家
                 case R.id.gmap_button2:
                     Log.e("button2","button2");
+                    bLoc =false;
                     if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
                     {
                         mRecyclerView.setVisibility(View.INVISIBLE);
@@ -281,6 +303,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 //搜尋店家
                 case R.id.gmap_button3:
                     Log.e("button3","button3");
+                    bLoc =false;
                     if (null != mRecyclerView && mRecyclerView.getVisibility() == View.VISIBLE)
                     {
                         mRecyclerView.setVisibility(View.INVISIBLE);
@@ -317,6 +340,12 @@ public class Activity_GoogleMap extends AppCompatActivity {
         });
     }
 
+    //移到目前座標
+    private void moveToCurrentLocation(){
+        Log.e("移動地圖攝影機","lat=" +lat+",lng="+lng);
+        gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(new LatLng(lat, lng)).zoom(16).bearing(0).tilt(25).build()));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -324,9 +353,31 @@ public class Activity_GoogleMap extends AppCompatActivity {
         // 顯示處理中圖示
         setProgressBarIndeterminateVisibility(true);
         setProgressBarVisibility(true);
+        //讀取定位權限
+        LocationManager status = (LocationManager) (this.getSystemService(Context.LOCATION_SERVICE));
         // 執行註冊，設備是GPS，只會讀取一次位置資訊
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
-        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
+        //強制不執行定位
+        if (bLoc ==true )  {
+            moveToCurrentLocation();
+            return;
+        }
+
+
+        if (status.isProviderEnabled(LocationManager.GPS_PROVIDER) || status.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
+            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
+        }
+        else
+        {
+            //取出上次位置
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            lat = location.getLatitude();
+            lng = location.getLongitude();
+
+            if (userLocMark != null) {userLocMark.remove(); userLocMark=null;}
+            userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
+            moveToCurrentLocation();
+        }
 
     }
 
@@ -347,6 +398,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        moveToCurrentLocation();
     }
 
     @Override
@@ -369,7 +421,10 @@ public class Activity_GoogleMap extends AppCompatActivity {
             StringBuffer sb = new StringBuffer("Location Information:\n");
             if(location != null){
                 lat =location.getLatitude();
-                lng =  location.getLongitude();
+                lng =location.getLongitude();
+                Log.e("定位取得座標","lat=" + lat+ " ,lng="+lng);
+                bLoc =true;
+
                 if (userLocMark != null) {userLocMark.remove(); userLocMark=null;}
 
                 userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
@@ -546,6 +601,12 @@ public class Activity_GoogleMap extends AppCompatActivity {
     {
         db = new PhpDB(context, hd);
         showRecycleView = showRecord;
+        if (!bLoc)
+        {
+
+
+        }
+
         switch(functionWork)
         {
             case FUNCTION_STORENEAR:

@@ -34,8 +34,11 @@ public class StoreDBConn_OkhttpEnqueue {
     private ArrayList<Store> storeList = new ArrayList<>();
     private WeakReference<Context> activityReference;
 
-    public StoreDBConn_OkhttpEnqueue(Context context, String lat, String lng){
+    public StoreDBConn_OkhttpEnqueue(Context context){
         activityReference = new WeakReference<>(context);
+    }
+
+    public void setLatLng(String lat, String lng){
         this.lat = lat;
         this.lng = lng;
     }
@@ -86,13 +89,14 @@ public class StoreDBConn_OkhttpEnqueue {
             @Override
             public void onFailure(Call call, IOException e) {
                 // 連線失敗
-                Log.e("storeDBQuery_failed", " no Data!");
-                ((Activity)context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showDialog();
-                    }
-                });
+                if (!((Activity) context).isFinishing()) {
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showDialog();
+                        }
+                    });
+                }
             }
         });
     }

@@ -34,20 +34,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTask"/>
+        <activity android:name=".MainActivity"/>
         <activity android:name=".login.LoginActivity"/>
         <activity android:name=".login.AccInfoActivity"/>
         <activity android:name=".login.AccRegiActivity"/>
         <activity android:name=".login.SendPassActivity"/>
         <activity android:name=".menu.MenuActivity"/>
-        <activity
-            android:name=".menu.SelectedActivity"
-            android:launchMode="singleTask"/>
-        <activity
-            android:name=".menu.CheckOutActivity"
-            android:launchMode="singleTask"/>
+        <activity android:name=".menu.SelectedActivity"/>
+        <activity android:name=".menu.CheckOutActivity"/>
         <activity
             android:name="langotec.numberq.client.map.Activity_GoogleMap"
             android:label="@string/title_activity_googlemap"

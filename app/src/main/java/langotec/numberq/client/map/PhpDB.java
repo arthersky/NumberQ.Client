@@ -16,6 +16,7 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,18 +24,18 @@ import langotec.numberq.client.R;
 
 //2018-09-21 (Fri)
 //分成 一.PhpDB主程序功能與傳入參數選擇  子物件 1.參數物件  子物件 2.連線+字串解析+輸出輸入物件
-public class PhpDB extends Application implements Runnable
+public class PhpDB implements Runnable
 {
     static public final int PHP_SELECT = 0;
     static public final int PHP_INSERT = 1;
     static public final int PHP_UPDATE = 2;
     static public final int PHP_DELETE = 3;
-    private Context context;
+    private WeakReference<Context> weakReference;
     private int workSelect=-1;
     private boolean blReady=false;
     private Handler dataHandler = null;
     private HttpDataFromPHP httpDataFromPHP;
-    protected PairSet pairSet = null;
+    public PairSet pairSet = null;
 
     private ArrayList<ItemListRow> itemListSet;
     private HashMap<String,Object> newItem = new HashMap<>();
@@ -51,6 +52,9 @@ public class PhpDB extends Application implements Runnable
         }catch(Exception e) {return 0; } }
         public HashMap<String,Object> getAll(){ return subItem; }
     }
+
+    //取得設定的Function Name
+    public String getPairFunction() {if (pairSet != null) {return pairSet.getPairFunction();} else return ""; }
 
     //傳回資料是否Ready true =資料已經準備完畢
     public boolean getState(){return blReady;}
@@ -85,28 +89,28 @@ public class PhpDB extends Application implements Runnable
     //PhpDB主要程序===============================
     //建構子做必要變數初始化 !一定要傳入PhpDB(context) 否則抓不到變數
     public PhpDB(){this(null);}
-    public PhpDB(Context context)
-    {
-        this(context,PHP_SELECT,null); //預設使用查詢
+    public PhpDB(Context context){
+        this(context, PHP_SELECT,null); //預設使用查詢
     }
-    public PhpDB(Context context,int work)  {
-        this(context,PHP_SELECT,null); //預設使用查詢
+    public PhpDB(Context context, int work)  {
+        this(context, PHP_SELECT,null); //預設使用查詢
     }
-    public PhpDB(Context context,Handler hand)  {
-        this(context,PHP_SELECT,hand); //預設使用查詢
+    public PhpDB(Context context, Handler hand)  {
+        this(context, PHP_SELECT, hand); //預設使用查詢
     }
-    public PhpDB(Context context,int work,Handler hand)  {
+    public PhpDB(Context context, int work, Handler hand)  {
         blReady = false;
-        this.context =context;
+        this.weakReference = new WeakReference<>(context);
         Log.e("phpDB","初始化成功!");
-        workSelect= work;
+        workSelect = work;
         dataHandler = hand;
     }
 
 
     //======================================參數設置==============================================
-    public  class  PairSet
+    public class PairSet
     {
+        Context context = weakReference.get();
         //Http 相關
         final String SERVER = context.getResources().getString(R.string.server);
         final String SELECT  =context.getResources().getString(R.string.select);
@@ -121,12 +125,17 @@ public class PhpDB extends Application implements Runnable
         final String phpSQLPwd = context.getResources().getString(R.string.phpSQLPwd); //通關碼
         final String phpSQLstoreList  = context.getResources().getString(R.string.phpSQLstoreList); //商店清單
         final String phpSQLstoreSearchByName = context.getResources().getString(R.string.phpSQLstoreSearchByName); //商店搜尋
+        final String phpSQLstoreProductList = context.getResources().getString(R.string.phpSQLstoreProductList); //產品搜尋
         final String phpSQLuserList = context.getResources().getString(R.string.phpSQLuserList); //人員清單
         final String phpSQLuserSearchByEMAIL = context.getResources().getString(R.string.phpSQLuserSearchByEMAIL); //Email人員搜尋
         final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
         final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
-        final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
+        public final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
         final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
+        final String phpSQLdelOrder = context.getResources().getString(R.string.phpSQLdelOrder); //訂單刪除
+        public final String phpSQLnewOrderSub  = context.getResources().getString(R.string.phpSQLnewOrderSub); //訂單菜單新增
+        final String phpSQLsetOrderSub  = context.getResources().getString(R.string.phpSQLsetOrderSub); //訂單菜單修改
+        final String phpSQLdelOrderSub  = context.getResources().getString(R.string.phpSQLdelOrderSub); //訂單菜單刪除
 
         //設定用參數
         final String phpSQLNumDefault  = context.getResources().getString(R.string.phpSQLNumDefault); //預設資料筆數
@@ -148,7 +157,10 @@ public class PhpDB extends Application implements Runnable
         final String phpSQLSearch14  = context.getResources().getString(R.string.phpSQLSearch14); //s14
         final String phpSQLSearch15  = context.getResources().getString(R.string.phpSQLSearch15); //s15
 
+        //內部紀錄參數
         private ArrayList<NameValuePair> pairs;
+        //紀錄最後呼叫 Function
+        private String functionName="";
 
         //慣例建構子
         public PairSet(){this("",true,-1,-1,-1);}
@@ -221,6 +233,7 @@ public class PhpDB extends Application implements Runnable
 
         public void setPairFunction(String WorkFunction)  //呼叫功能
         {
+            functionName = WorkFunction;
             if (!WorkFunction.equals("")) setPair(phpSQLFunction,WorkFunction);
         }
 
@@ -277,6 +290,9 @@ public class PhpDB extends Application implements Runnable
         { return SERVER;}
         public String getSelectURL()
         { return SELECT;}
+        public String getPairFunction()
+        { return functionName; }
+
 
     }
     //======================================參數設置 END==========================================

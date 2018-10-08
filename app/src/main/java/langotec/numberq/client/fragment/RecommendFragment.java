@@ -39,7 +39,7 @@ public class RecommendFragment extends Fragment {
     private FloatingActionButton fb;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> mAdapter;
+    private RecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private Slider slider;
@@ -111,12 +111,20 @@ public class RecommendFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mAdapter.menuDBConn != null) {
+            mAdapter.menuDBConn.cancel(true);
+            mAdapter.menuDBConn.loadingDialog.closeDialog();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.search_button:
                 showDialog();
                 break;
-
         }
         return super.onOptionsItemSelected(item);
     }

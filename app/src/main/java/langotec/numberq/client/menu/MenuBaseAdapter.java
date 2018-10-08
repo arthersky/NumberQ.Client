@@ -81,7 +81,8 @@ public class MenuBaseAdapter extends BaseAdapter {
 			}
             final Order order = (Order) getItem(position);
             String str[] = setTextLoop(order);
-
+            //順便設定此筆訂單的總額
+            order.setTotalPrice(Integer.parseInt(str[3]));
 			//設定單一訂單標題
             final Menu menu = ((Order) data.get(position)).get(0);
 			if (menu.getHeadName().equals("鼎泰豐"))
@@ -93,7 +94,7 @@ public class MenuBaseAdapter extends BaseAdapter {
             holder.textMenuName.setText(str[0]);
             holder.textQuantity.setText(str[1]);
             holder.textPrice.setText(str[2]);
-            holder.textTotal.setText(str[3]);
+            holder.textTotal.setText(context.getString(R.string.menu_totalPrice) + str[3]);
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -104,11 +105,12 @@ public class MenuBaseAdapter extends BaseAdapter {
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    showDialog(position, order);
+                    showDialog(position);
                     return false;
                 }
             });
 		}
+        CheckOutActivity.orderList = data;
 		return convertView;
 	}
 
@@ -138,12 +140,12 @@ public class MenuBaseAdapter extends BaseAdapter {
             str[2] += context.getString(R.string.menu_singlePrice) + menu.getPrice() + "\n";
             total += Integer.parseInt(menu.getPrice()) * menu.getQuantityNum();
         }
-        str[3] += context.getString(R.string.menu_totalPrice) + String.valueOf(total);
+        str[3] += String.valueOf(total);
 	    return str;
     }
 
     //修改購物車內容的對話框功能
-    private void showDialog(final int position, final Order order) {
+    private void showDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getResources().getString(R.string.cart_modify))
             .setIcon(android.R.drawable.ic_dialog_info)
@@ -154,11 +156,6 @@ public class MenuBaseAdapter extends BaseAdapter {
                         //移除Cart內被選中的店家的Menu
                         Cart cart = Cart.getInstance(context);
                         Menu menu = ((Order)data.get(position)).get(0);
-//                        for (Menu m : cart) {
-//                            if (m.getHeadName().equals(menu.getHeadName()) &&
-//                                    m.getBranchName().equals(menu.getBranchName()))
-//                                cart.remove(m);
-//                        }
                         for (int i = 0 ; i < cart.size(); i++) {
                             if (cart.get(i).getHeadName().equals(menu.getHeadName()) &&
                                     cart.get(i).getBranchName().equals(menu.getBranchName())) {
