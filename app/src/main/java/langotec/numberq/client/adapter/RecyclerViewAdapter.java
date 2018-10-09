@@ -1,10 +1,10 @@
 package langotec.numberq.client.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -146,9 +146,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                                 //移除Cart內選定的商品
                                 data.remove(position);
                                 notifyDataSetChanged();
-                                Intent intent = new Intent(context, MainActivity.class);
-                                intent.putExtra("currentPage", 2);
-                                context.startActivity(intent);
+                                Fragment fragment = MainActivity.cartFragment;
+                                fragment.getFragmentManager().beginTransaction().
+                                        detach(fragment).attach(fragment).commit();
                             }
                         })
                 .setNegativeButton(context.getResources().getString(R.string.cart_modifyQuantity),

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,10 +57,9 @@ public class MenuBaseAdapter extends BaseAdapter {
 			convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent();
+                    Intent intent = new Intent(context, SelectedActivity.class);
                     //把被按下的Menu物件放進intent
                     intent.putExtra("Menu", menu);
-                    intent.setClass(context, SelectedActivity.class);
                     context.startActivity(intent);
                 }
             });

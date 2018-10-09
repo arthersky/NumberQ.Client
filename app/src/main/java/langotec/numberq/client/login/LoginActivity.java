@@ -156,14 +156,13 @@ public class LoginActivity extends AppCompatActivity {
     private void loginSuccessGoTo(){
         Intent intent = new Intent();
         if (startFrom != null && startFrom.equals("fromCartFragment")) {
-            intent.putExtra("User", user.getData());
             intent.setClass(context, CheckOutActivity.class);
         }
         else{
-            intent.putExtra("startFrom", "fromLoginActivity");
             intent.setClass(context, MainActivity.class);
+            intent.putExtra("currentPage", 3);
         }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish();
     }
 }

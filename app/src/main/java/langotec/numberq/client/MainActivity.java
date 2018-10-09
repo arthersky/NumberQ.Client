@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         setupViewPager();
         viewPager.setCurrentItem(getIntent().getIntExtra("currentPage", 0));
+
     }
 
     @Override

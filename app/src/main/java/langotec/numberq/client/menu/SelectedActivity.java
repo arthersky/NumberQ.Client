@@ -88,7 +88,9 @@ public class SelectedActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.menu_backHome:
                 System.gc();
-                startActivity(new Intent(context, MainActivity.class));
+                intent.setClass(context, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -175,6 +177,7 @@ public class SelectedActivity extends AppCompatActivity {
         else if (menu.getFrom().equals("fromCartFragment")){
             intent.setClass(context, MainActivity.class);
             intent.putExtra("currentPage", 2);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             for (int i = 0 ; i < cart.size(); i++){
                 if (cart.get(i).getFrom().equals("fromCartFragment")){

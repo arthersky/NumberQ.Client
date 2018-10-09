@@ -2,8 +2,6 @@ package langotec.numberq.client.fragment;
 
 
 import android.app.AlertDialog;
-import android.app.FragmentContainer;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.adapter.RecyclerViewAdapter;
 import langotec.numberq.client.login.LoginActivity;
@@ -116,8 +112,9 @@ public class CartFragment extends Fragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //清除購物車內資料，及更新CartFragment畫面
                                 cart.clear();
-                                getFragmentManager().beginTransaction().
-                                    detach(CartFragment.this).attach(CartFragment.this).commit();
+                                CartFragment cartFragment = CartFragment.this;
+                                cartFragment.getFragmentManager().beginTransaction().
+                                        detach(cartFragment).attach(cartFragment).commit();
                             }
                         })
                 .setNegativeButton(getString(R.string.menu_cancel),
