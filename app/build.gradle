@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     buildToolsVersion '27.0.3'
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId 'langotec.numberq.client'
         minSdkVersion 21
@@ -16,11 +17,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    android {
-        useLibrary 'org.apache.http.legacy'
-    }
-    productFlavors {
     }
 }
 

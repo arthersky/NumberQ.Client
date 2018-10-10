@@ -28,6 +28,7 @@ import langotec.numberq.client.login.Member;
  * A simple {@link Fragment} subclass.
  */
 public class MoreFragment extends Fragment {
+
     public Context context = null;
     private Button btnCheck;
     private TextView status;
