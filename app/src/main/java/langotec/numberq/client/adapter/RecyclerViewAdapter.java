@@ -75,15 +75,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
 
             if (store.getHeadName().equals("八方雲集")){
-//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
-                store.setHeadImg("https://langotec.000webhostapp.com/numberq/icons/bafun.jpg");
                 textIntroduction.setText("鍋貼、水餃專賣店");
             }else if (store.getHeadName().equals("鼎泰豐")){
-//                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
-                store.setHeadImg("https://langotec.000webhostapp.com/numberq/icons/dintaifung.png");
                 textIntroduction.setText("世界知名小籠包");
             }else if (store.getHeadName().equals("三商巧福")){
-                store.setHeadImg("https://langotec.000webhostapp.com/numberq/icons/3375.jpg");
                 textIntroduction.setText("連鎖正宗台式牛肉麵");
             }
             textStoreName.setText(store.getHeadName());
