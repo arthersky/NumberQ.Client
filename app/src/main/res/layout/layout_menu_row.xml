@@ -5,16 +5,19 @@
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="230dp"
-        android:layout_height="150dp"/>
+        android:layout_width="180dp"
+        android:layout_height="150dp"
+        android:paddingLeft="5dp" />
 
     <TextView
         android:id="@+id/productName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/image"
-        android:paddingTop="40dp"
         android:paddingBottom="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="10dp"
+        android:paddingTop="40dp"
         android:textColor="#000000"
         android:textSize="20dp" />
 
@@ -24,6 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/productName"
         android:layout_toRightOf="@+id/image"
+        android:paddingLeft="5dp"
+        android:paddingRight="10dp"
         android:textColor="#000000"
         android:textSize="20dp" />
 

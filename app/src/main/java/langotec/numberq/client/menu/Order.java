@@ -1,12 +1,10 @@
 package langotec.numberq.client.menu;
 
-import android.view.OrientationEventListener;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class Order extends ArrayList<Menu> {
-
+public class Order extends ArrayList<Menu> implements Serializable {
     private String orderId;
     private String userId;
     private String HeadId;
@@ -21,6 +19,7 @@ public class Order extends ArrayList<Menu> {
     private String comment;
     private String userName;
     private Calendar orderDT;
+    private Calendar finishTime;
 
     public Order(){}
     public Order(
@@ -164,12 +163,20 @@ public class Order extends ArrayList<Menu> {
 
     public String getOrderDT(String str){
         return String.valueOf(
-                "下訂日期" + orderDT.get(Calendar.YEAR) +
-                "/" + setDigit(orderDT.get(Calendar.MONTH)) +
-                "/" + setDigit(orderDT.get(Calendar.DAY_OF_MONTH)) +
-                "   時間" + setDigit(orderDT.get(Calendar.HOUR_OF_DAY)) +
-                ":" + setDigit(orderDT.get(Calendar.MINUTE)) +
-                ":" + setDigit(orderDT.get(Calendar.SECOND)));
+                "\n下訂日期:" + orderDT.getTime().toString() +
+                "\n訂單完成時間:" + finishTime.getTime().toString());
+    }
+
+    public void setOrderDT(Calendar orderDT) {
+        this.orderDT = orderDT;
+    }
+
+    public Calendar getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(Calendar finishTime) {
+        this.finishTime = finishTime;
     }
 
     private String setDigit(int str){
@@ -177,8 +184,12 @@ public class Order extends ArrayList<Menu> {
         return value.length() == 2 ? value : "0"+value;
     }
 
-    public void setOrderDT(Calendar orderDT) {
-        this.orderDT = orderDT;
+    public void setFinishTime(){
+        finishTime = Calendar.getInstance();
+        finishTime.setTime(orderDT.getTime());
+        for(Menu m : this){
+            finishTime.add(Calendar.MINUTE,
+                    Integer.parseInt(m.getWaitTime()) * m.getQuantityNum());
+        }
     }
-
 }

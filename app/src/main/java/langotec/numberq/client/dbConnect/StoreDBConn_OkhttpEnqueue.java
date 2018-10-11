@@ -82,6 +82,7 @@ public class StoreDBConn_OkhttpEnqueue {
                         intent.putExtra("storeList", parseJSON(qResult));
                         intent.setClass(context, MainActivity.class);
                         context.startActivity(intent);
+                        ((Activity)context).finish();
                     }
                     response.close();
                 }

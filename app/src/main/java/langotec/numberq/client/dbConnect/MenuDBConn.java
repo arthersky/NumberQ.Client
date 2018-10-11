@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.menu.Menu;
 import langotec.numberq.client.menu.MenuActivity;
@@ -27,14 +28,16 @@ import okhttp3.Response;
 public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String qResult = "no record";
     private String headName, branchName;
+    private int branchId;
     public LoadingDialog loadingDialog;
     private WeakReference<Context> activityReference;
     private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
 
-    public MenuDBConn(String headName, String branchName, Context context) {
+    public MenuDBConn(String headName, String branchName, int branchId, Context context) {
         this.headName = headName;
         this.branchName = branchName;
+        this.branchId = branchId;
         activityReference = new WeakReference<>(context);
     }
 
@@ -42,8 +45,9 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Context context = activityReference.get();
-        loadingDialog = new LoadingDialog(context, this);
+        loadingDialog = new LoadingDialog(activityReference);
+        loadingDialog.setCancel(this);
+        MainActivity.allowBack = false;
     }
 
     @Override
@@ -99,6 +103,7 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
             showDialog();
         }
         loadingDialog.closeDialog();
+        MainActivity.allowBack = true;
     }
 //endregion
 
@@ -129,10 +134,11 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
                 String productName = jsObj.getString("productName");
                 String price = jsObj.getString("price");
                 String image = jsObj.getString("image");
+                String waitTime = jsObj.getString("waitingTime");
                 boolean available = Integer.parseInt(jsObj.getString("available")) != 0;
                 String description = jsObj.getString("description");
                 Menu menu = new Menu(HeadName, branchName, HeadId, productId, productType, productName,
-                        price, image, available, description);
+                        price, image, available, description, waitTime, branchId);
                 menuList.add(menu);
             }
         } catch (JSONException e) {

@@ -41,7 +41,9 @@
         <activity android:name=".login.SendPassActivity"/>
         <activity android:name=".menu.MenuActivity"/>
         <activity android:name=".menu.SelectedActivity"/>
-        <activity android:name=".menu.CheckOutActivity"/>
+        <activity
+            android:name=".menu.CheckOutActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="langotec.numberq.client.map.Activity_GoogleMap"
             android:label="@string/title_activity_googlemap"

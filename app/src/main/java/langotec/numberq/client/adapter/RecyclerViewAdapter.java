@@ -68,8 +68,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    menuDBConn = new MenuDBConn(((Store) data.get(position)). getHeadName(),
-                            ((Store) data.get(position)).getBranchName(), context);
+                    Store s = (Store) data.get(position);
+                    menuDBConn = new MenuDBConn(s. getHeadName(),
+                            s.getBranchName(), s.getBranchId(), context);
                     menuDBConn.execute();
                 }
             });
@@ -96,12 +97,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             menu.setImageView(cartIconImage);
             cartStoreName.setText(menu.getHeadName() + "-" + menu.getBranchName());
-            cartDesc.setText(menu.getProductName() + "\t\t" +
-                    context.getResources().getString(R.string.menu_singlePrice) + menu.getPrice());
+            cartDesc.setText(menu.getProductName());
             cartTotal.setText(context.getResources().getString(R.string.menu_quantity) +
-                    menu.getQuantityNum() + "\t\t" +
-                    context.getResources().getString(R.string.menu_NT)
-                    + (Integer.parseInt(menu.getPrice()) * menu.getQuantityNum()));
+                    menu.getQuantityNum() + "\t\t\t" +
+                    context.getResources().getString(R.string.menu_singlePrice) + menu.getPrice());
 
             view.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override

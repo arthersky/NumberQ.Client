@@ -74,7 +74,6 @@ public class WelcomeActivity extends AppCompatActivity{
         timer.cancel();
         if (storeDBConn.call != null && storeDBConn.call.isExecuted())
             storeDBConn.call.cancel();
-        finish();
     }
 
     @Override
