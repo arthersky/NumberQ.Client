@@ -76,14 +76,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             });
 
             if (store.getHeadName().equals("八方雲集")){
-                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.bafun));
                 textIntroduction.setText("鍋貼、水餃專賣店");
             }else if (store.getHeadName().equals("鼎泰豐")){
-                storeIconImage.setImageDrawable(context.getDrawable(R.drawable.ding));
                 textIntroduction.setText("世界知名小籠包");
+            }else if (store.getHeadName().equals("三商巧福")){
+                textIntroduction.setText("連鎖正宗台式牛肉麵");
             }
             textStoreName.setText(store.getHeadName());
             textBranchName.setText(store.getBranchName());
+            store.setImageView(storeIconImage);
         }
 
         else if (data instanceof Cart){

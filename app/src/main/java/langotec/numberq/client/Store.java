@@ -175,10 +175,11 @@ public class Store implements Serializable {
         this.lng = lng;
     }
 
-    public void setImageView(ImageView imageView, String imgUrl){
+    public void setImageView(ImageView imageView){
         Picasso
                 .get()
-                .load(imgUrl)
+                .load(headImg)
+                .resize(90,90)
                 .placeholder(R.drawable.placeholder)
                 .into(imageView);
     }

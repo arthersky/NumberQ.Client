@@ -150,6 +150,7 @@ public class StoreDBConn_OkhttpEnqueue {
                 double lng = Double.parseDouble(jsObj.getString("lng"));
                 Store store = new Store(HeadName, headImg, id, HeadId, BranchId, BranchName, City, Area, Address, Phone, FAX, opening, inService, waitingNumber, lat, lng);
                 storeList.add(store);
+//                Log.e("Store.ImgURL",headImg);
             }
         } catch (JSONException e) {
             e.printStackTrace();
