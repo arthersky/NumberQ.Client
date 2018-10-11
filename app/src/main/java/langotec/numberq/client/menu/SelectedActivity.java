@@ -32,6 +32,8 @@ public class SelectedActivity extends AppCompatActivity {
     private Cart cart;
     private Context context;
     private View rootView;
+    private int searchIndex, addUpQuantity;
+    private boolean searchFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,6 @@ public class SelectedActivity extends AppCompatActivity {
         super.onPause();
         cart.saveCartFile(context);
         System.gc();
-        finish();
     }
 
     @Override
@@ -130,7 +131,7 @@ public class SelectedActivity extends AppCompatActivity {
         rootView.getViewTreeObserver().addOnGlobalLayoutListener(new MyTypingListener());
 
         //判斷cartButton要放什麼字
-        if (menu.getFrom().equals("fromSelectActivity"))
+        if (menu.getFrom().equals("fromMenuActivity"))
             cartText.setText(getResources().getString(R.string.menu_putInCart));
         else if (menu.getFrom().equals("fromCartFragment"))
             cartText.setText(getResources().getString(R.string.menu_backToCart));
@@ -171,7 +172,7 @@ public class SelectedActivity extends AppCompatActivity {
     public void onCartClick(View view){
         cart = Cart.getInstance(context);
 
-        if (menu.getFrom().equals("fromSelectActivity"))
+        if (menu.getFrom().equals("fromMenuActivity"))
             showDialog();
             //如果是從購物車畫面進入修改數量，要處理修改完跳回購物車，及刪除/新增Cart的內容
         else if (menu.getFrom().equals("fromCartFragment")){
@@ -184,9 +185,7 @@ public class SelectedActivity extends AppCompatActivity {
                     cart.remove(i);
                 }
             }
-            Menu m = new Menu(menu.getHeadName(), menu.getBranchName(), menu.getHeadId(),
-                    menu.getProductId(), menu.getType(),menu.getProductName(), menu.getPrice(),
-                    menu.getImageURL(), menu.isAvailable(), menu.getDesc());
+            Menu m = getNewMenu();
             m.setQuantityNum(menu.getQuantityNum());
             cart.add(m);
         }
@@ -194,26 +193,37 @@ public class SelectedActivity extends AppCompatActivity {
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        int i = 0;
-        for (Menu menus : cart ) {
-            if (menus.getProductName().equals(menu.getProductName())) {
-                i ++;
-                builder.setMessage(getResources().getString(R.string.menu_cartHas) + i +
+        searchIndex = 0;
+        addUpQuantity = 0;
+        searchFlag = false;
+        for (Menu menus : cart) {
+            if (menus.getProductName().equals(menu.getProductName()) &&
+                    menus.getHeadName().equals(menu.getHeadName()) &&
+                    menus.getBranchName().equals(menu.getBranchName())) {
+                searchIndex ++;
+                builder.setMessage(getResources().getString(R.string.menu_cartHas) + searchIndex +
                         getResources().getString(R.string.menu_an) + menu.getProductName()
                         + getResources().getString(R.string.menu_addAnother));
+                searchFlag = true;
+                break;
             }
         }
         builder.setTitle(R.string.menu_cartInfo)
+                .setCancelable(false)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setPositiveButton(R.string.menu_confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //強制製造一個新的相同Menu實體，防止物件指標重複指到相同Menu
-                        Menu m = new Menu(menu.getHeadName(), menu.getBranchName(),
-                                menu.getHeadId(), menu.getProductId(), menu.getType(),
-                                menu.getProductName(), menu.getPrice(), menu.getImageURL(),
-                                menu.isAvailable(), menu.getDesc());
-                        m.setQuantityNum(menu.getQuantityNum());
+                        Menu m = getNewMenu();
+                        //如果有找到重複的菜單，加總數量後刪除購物車內同名菜單
+                        if (searchFlag) {
+                            addUpQuantity = cart.get(searchIndex - 1).getQuantityNum() +
+                                    menu.getQuantityNum();
+                            cart.remove(searchIndex - 1);
+                            m.setQuantityNum(addUpQuantity);
+                        }else {
+                            m.setQuantityNum(menu.getQuantityNum());
+                        }
                         cart.add(m);
                         Snackbar snackbar = Snackbar.make(findViewById(R.id.selected_constraintLayout),
                                 R.string.menu_added, Snackbar.LENGTH_SHORT );
@@ -228,6 +238,14 @@ public class SelectedActivity extends AppCompatActivity {
                     }
                 })
                 .create().show();
+    }
+
+    private Menu getNewMenu(){
+        //強制製造一個新的相同Menu實體，防止物件指標重複指到相同Menu
+        return new Menu(menu.getHeadName(), menu.getBranchName(),
+                menu.getHeadId(), menu.getProductId(), menu.getType(),
+                menu.getProductName(), menu.getPrice(), menu.getImageURL(),
+                menu.isAvailable(), menu.getDesc(), menu.getWaitTime(), menu.getBranchId());
     }
     //endregion
 

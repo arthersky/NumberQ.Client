@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -599,7 +600,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
     private void refresh_Record(int num,int functionWork,boolean showRecord)
     {
-        db = new PhpDB(context, hd);
+        db = new PhpDB(new WeakReference(context), hd);
         showRecycleView = showRecord;
         if (!bLoc)
         {

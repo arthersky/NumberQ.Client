@@ -93,18 +93,15 @@
 
     <string name="menu_app_name">NumberQ_Menu</string>
     <string name="menu_no_record">No record!</string>
-    <string name="menu_dessert1">清脆的豆芽菜，配上軟潤香滑的冬粉、海帶與豆乾絲，口感層次豐富爽口，讓您吃出猶如夏天的滋味。</string>
-    <string name="menu_dessert2">風味道地的乾煸四季豆，以蝦米與辣椒肉末拌炒，同時能嚐到四季豆的鮮甜與乾煸香氣，滋味爽脆鹹香，讓您一口接一口，不捨放下筷子。</string>
-    <string name="menu_dessert3">上海口味的炸排骨，以獨特醬汁醃製入味，不沾粉的寧式作法，炸至表層金黃，外酥內嫩的口感，值得一試!</string>
     <string name="menu_NT">NT $</string>
     <string name="menu_waitNum">店家目前等待人數:</string>
     <string name="menu_waitTime">預計取餐時間:</string>
     <string name="menu_cartInfo">確定要放入購物車嗎?</string>
     <string name="menu_confirm">確定</string>
     <string name="menu_cancel">取消</string>
-    <string name="menu_cartHas">您的購物車內已有</string>
-    <string name="menu_an">筆</string>
-    <string name="menu_addAnother">的清單囉，再新增一筆嗎?</string>
+    <string name="menu_cartHas">購物車內已有</string>
+    <string name="menu_an">筆同一間店家的</string>
+    <string name="menu_addAnother">囉，系統將會合併數量，確定嗎?</string>
     <string name="menu_added">已加入購物車</string>
     <string name="menu_added_cancel">取消</string>
     <string name="menu_added_canceled">已取消</string>
@@ -131,6 +128,10 @@
     <string name="checkOut_check">結帳</string>
     <string name="checkOut_click">長按即可修改訂單</string>
     <string name="checkOut_delete">刪除這筆訂單</string>
+    <string name="checkOut_dialog_title">確定要付款結帳嗎?</string>
+    <string name="checkOut_dialog_message">按下確定後即成立訂單囉</string>
+    <string name="checkOut_creatingOrders">訂單建立中…</string>
+    <string name="checkOut_createOrderSuccess">成功建立訂單</string>
 
     <string name="connFail_noConn">目前無法連線</string>
     <string name="connFail_check">請檢查您的網路設定，謝謝您</string>
@@ -140,4 +141,5 @@
     <string name="dialog_loading">Loading</string>
     <string name="dialog_searchTitle">搜尋店家</string>
     <string name="dialog_searchMessage">請輸入店家名稱</string>
+
 </resources>

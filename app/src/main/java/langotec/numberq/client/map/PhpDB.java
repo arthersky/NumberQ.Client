@@ -89,18 +89,18 @@ public class PhpDB implements Runnable
     //PhpDB主要程序===============================
     //建構子做必要變數初始化 !一定要傳入PhpDB(context) 否則抓不到變數
     public PhpDB(){this(null);}
-    public PhpDB(Context context){
-        this(context, PHP_SELECT,null); //預設使用查詢
+    public PhpDB(WeakReference<Context> weakReference){
+        this(weakReference, PHP_SELECT,null); //預設使用查詢
     }
-    public PhpDB(Context context, int work)  {
-        this(context, PHP_SELECT,null); //預設使用查詢
+    public PhpDB(WeakReference<Context> weakReference, int work)  {
+        this(weakReference, PHP_SELECT,null); //預設使用查詢
     }
-    public PhpDB(Context context, Handler hand)  {
-        this(context, PHP_SELECT, hand); //預設使用查詢
+    public PhpDB(WeakReference<Context> weakReference, Handler hand)  {
+        this(weakReference, PHP_SELECT, hand); //預設使用查詢
     }
-    public PhpDB(Context context, int work, Handler hand)  {
+    public PhpDB(WeakReference<Context> weakReference, int work, Handler hand)  {
         blReady = false;
-        this.weakReference = new WeakReference<>(context);
+        this.weakReference = weakReference;
         Log.e("phpDB","初始化成功!");
         workSelect = work;
         dataHandler = hand;
@@ -131,7 +131,7 @@ public class PhpDB implements Runnable
         final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
         final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
         public final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
-        final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
+        public final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
         final String phpSQLdelOrder = context.getResources().getString(R.string.phpSQLdelOrder); //訂單刪除
         public final String phpSQLnewOrderSub  = context.getResources().getString(R.string.phpSQLnewOrderSub); //訂單菜單新增
         final String phpSQLsetOrderSub  = context.getResources().getString(R.string.phpSQLsetOrderSub); //訂單菜單修改
@@ -323,7 +323,7 @@ public class PhpDB implements Runnable
         public void run()
         {
             Log.e("HttpDataFromPHP","執行序執行中");
-            itemListSet = getData(); //有點多寫的
+            getData(); //有點多寫的
             //有設定 Handler 則傳出資料
 
             if (null != dataHandler ) {

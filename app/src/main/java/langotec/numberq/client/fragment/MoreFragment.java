@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.dbConnect.CustomerDBConn;
 import langotec.numberq.client.login.AccInfoActivity;
@@ -75,6 +76,7 @@ public class MoreFragment extends Fragment {
                             Intent intent = new Intent(context, LoginActivity.class);
                             getActivity().startActivity(intent);
                         } else if (btnCheck.getText() == "我的檔案") {
+                            MainActivity.allowBack = false;
                             loading = ProgressDialog.show(getActivity(),"載入會員資料","Loading...", false);
                             user = CustomerDBConn.getInstance();
                             user.query(handler, context.getFilesDir(), member.getEmail(), member.getPassword());
@@ -106,6 +108,7 @@ public class MoreFragment extends Fragment {
 //            Log.e("login.isOk", String.valueOf(isOk));
 //            Log.e("login.isConn", String.valueOf(isConn));
             loading.dismiss();
+            MainActivity.allowBack = true;
             if (isConn && isOk) { //連線成功
                 // 使用者已註冊
                 member = user.getData();

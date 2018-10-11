@@ -20,33 +20,32 @@ import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.fragment.MoreFragment;
 import langotec.numberq.client.fragment.OrderFragment;
 import langotec.numberq.client.fragment.RecommendFragment;
+import langotec.numberq.client.menu.CheckOutActivity;
 
 
 public class MainActivity extends AppCompatActivity {
 
     //store array
     public static ArrayList<Store> storeList;
-
     //BottomNavigationView
     private BottomNavigationView bottomNavigationView;
-
     //viewPager
     private ViewPager viewPager;
-
     //Fragments
     private RecommendFragment recommendFragment;
     private OrderFragment orderFragment;
     private MoreFragment moreFragment;
     private MenuItem prevMenuItem;
-
     /*為了讓AlertDialog裡的static方法能夠拿到cartFragment變數來更新
     CartFragment的畫面，CartFragment只能設為public static了*/
     public static CartFragment cartFragment;
+    public static boolean allowBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        allowBack = true;
 
         //take data bundle
         try{
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             Log.e("TAG",e.toString());
         }
-
     }
 
     //Override onNewIntent才可以從onResume抓到最新Intent
@@ -83,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         setupViewPager();
         viewPager.setCurrentItem(getIntent().getIntExtra("currentPage", 0));
-
+        if (CheckOutActivity.orderCreated)
+            CheckOutActivity.showDialog("createFinish");
     }
 
     @Override
@@ -105,6 +104,12 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main,menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (allowBack)
+            super.onBackPressed();
     }
 
     private void setupViewPager() {
