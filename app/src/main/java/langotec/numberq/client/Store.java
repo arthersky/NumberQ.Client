@@ -179,7 +179,7 @@ public class Store implements Serializable {
         Picasso
                 .get()
                 .load(headImg)
-                .resize(90,90)
+                .resize(400,400)
                 .placeholder(R.drawable.placeholder)
                 .into(imageView);
     }
