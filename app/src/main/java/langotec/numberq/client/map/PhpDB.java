@@ -13,6 +13,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -39,6 +40,9 @@ public class PhpDB implements Runnable
 
     private ArrayList<ItemListRow> itemListSet;
     private HashMap<String,Object> newItem = new HashMap<>();
+
+    private JSONArray jsonArray;
+
     //自訂物件 放置DB一整行
     public class ItemListRow{
         private HashMap<String,Object> subItem = new HashMap<String,Object>();
@@ -60,12 +64,16 @@ public class PhpDB implements Runnable
     public boolean getState(){return blReady;}
     //傳回處理完的SQL資料
     public ArrayList<ItemListRow> getDataSet(){if (blReady) return itemListSet; else return null; }
+    //回傳JSON
+    public JSONArray getJSONData(){if(pairSet.isJSON()) return jsonArray;else return null; }
     //傳回資料筆數
     public int getRowSize()  { if (blReady) return itemListSet.size();else return -1; }
     public int getColSize()  { if (blReady) return ((ItemListRow)itemListSet.get(0)).size();else return -1; }
     //環境變數
     public PairSet getPairSet(){ if (pairSet == null) pairSet = new PairSet(); return pairSet; }
     public void setPairSet(PairSet tpairSet){ pairSet = tpairSet;}
+    //返回是否JSON
+    public boolean isJSON(){return pairSet.isJSON();}
 
     //Thread 依照初始設定執行模組
     public void run()
@@ -113,7 +121,7 @@ public class PhpDB implements Runnable
         Context context = weakReference.get();
         //Http 相關
         final String SERVER = context.getResources().getString(R.string.server);
-        final String SELECT  =context.getResources().getString(R.string.select);
+        final String SELECT = context.getResources().getString(R.string.select);
         //引入php上的參數免得一大串傷眼睛 1.基本參數
         final String phpSQLPwdFunction = context.getResources().getString(R.string.phpSQLPwdFunction);
         final String phpSQLFunction = context.getResources().getString(R.string.phpSQLFunction) ;
@@ -121,6 +129,7 @@ public class PhpDB implements Runnable
         final String phpSQLLat = context.getResources().getString(R.string.phpSQLLat) ;
         final String phpSQLLng  = context.getResources().getString(R.string.phpSQLLng);
         final String phpSQLShowColumns  = context.getResources().getString(R.string.phpSQLShowColumns);
+        final String phpSQLtoJSON  = context.getResources().getString(R.string.phpSQLtoJSON);
         //引入php上的參數免得一大串傷眼睛 2.選擇性參數
         final String phpSQLPwd = context.getResources().getString(R.string.phpSQLPwd); //通關碼
         final String phpSQLstoreList  = context.getResources().getString(R.string.phpSQLstoreList); //商店清單
@@ -161,6 +170,11 @@ public class PhpDB implements Runnable
         private ArrayList<NameValuePair> pairs;
         //紀錄最後呼叫 Function
         private String functionName="";
+        //JSON格式
+        private boolean blJSON  = false;
+
+        public boolean isJSON() {
+            return this.blJSON;}
 
         //慣例建構子
         public PairSet(){this("",true,-1,-1,-1);}
@@ -251,10 +265,12 @@ public class PhpDB implements Runnable
             else removePair(phpSQLLng);
         }
 
-        public void setPairPass() //預設值
-        {
-            setPair(phpSQLPwdFunction,phpSQLPwd); //通關
-        }
+        public void setPairPass() ////通關
+        { setPair(phpSQLPwdFunction,phpSQLPwd); }
+
+        public void setPairJSON() //設定輸出JSON
+        {   this.blJSON = true;
+            setPair(phpSQLtoJSON,"1");}
 
         public void setPairDefault() //預設值
         {
@@ -323,7 +339,12 @@ public class PhpDB implements Runnable
         public void run()
         {
             Log.e("HttpDataFromPHP","執行序執行中");
-            getData(); //有點多寫的
+            //JSON的輸出不同
+            if (pairSet.isJSON()) {
+                jsonArray = getJSON();
+            }else {
+                itemListSet = getData(); //有點多寫的
+            }
             //有設定 Handler 則傳出資料
 
             if (null != dataHandler ) {
@@ -361,6 +382,49 @@ public class PhpDB implements Runnable
                 Log.e("getPHPConnection","getPHPConnection 資料回傳錯誤");
                 return null;
             }
+        }
+
+        //回傳從PHP來的JSON
+        public JSONArray getJSON()
+        {
+            try{
+                jsonArray = getJSON(getPHPConnection(""));
+                if (jsonArray.length() >0) blReady = true;
+                Log.e("getJSON","取得長度:"+jsonArray.length());
+            }catch(Exception ex){
+                Log.e("getJSON()",ex.toString());
+                jsonArray= null;
+            }
+            return jsonArray;
+        }
+
+        public JSONArray getJSON(HttpResponse response)
+        {
+            try {
+                StringBuilder sb = new StringBuilder();
+                final String status = response.getStatusLine().toString();
+
+                Log.e("getDate","讀取狀態: "+status);
+                if (status.split(" ")[1].equals("200"))
+                {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                    String readLine;
+
+                    while (((readLine = br.readLine()) != null)) {
+                        sb.append(readLine);
+                        //Log.e("getJSON",readLine);
+                    }
+                    jsonArray = new JSONArray(sb.toString());
+                }
+            }
+            catch(Exception ex) {
+                Log.e("getJSON","資料讀取失敗:" + ex.toString());
+                androidHttpClient.close();
+                androidHttpClient = null;
+            }
+            androidHttpClient.close();
+            androidHttpClient = null;
+            return jsonArray;
         }
 
         //這一段才是執行的核心

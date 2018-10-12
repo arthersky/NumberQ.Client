@@ -15,6 +15,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,6 +29,8 @@ import java.util.HashMap;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
+import langotec.numberq.client.dbConnect.CustomerDBConn;
+import langotec.numberq.client.dbConnect.parseJSON;
 import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.login.Member;
 import langotec.numberq.client.map.PhpDB;
@@ -34,6 +42,7 @@ public class CheckOutActivity extends AppCompatActivity {
     private static LoadingDialog loadingDialog;
     private static WeakReference<Context> weakReference;
     private static PhpDB db;
+    private static Member member;
     public static boolean orderCreated, allowBack;
     public static int orderIndex, menuIndex;
     public static ArrayList<Order> orderList;
@@ -47,6 +56,7 @@ public class CheckOutActivity extends AppCompatActivity {
         cart = Cart.getInstance(context);
         orderList = splitOrders();
         allowBack = true;
+        member = findMemberFile();
         setLayout();
     }
 
@@ -72,7 +82,7 @@ public class CheckOutActivity extends AppCompatActivity {
             super.onBackPressed();
     }
 
-//  region 例行性的OptionsMenu設定
+    //  region 例行性的OptionsMenu設定
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
         menu.findItem(R.id.search_button).setVisible(false);
@@ -85,7 +95,7 @@ public class CheckOutActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main,menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -104,7 +114,7 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 //  endregion
 
-    private void setLayout(){
+    private void setLayout() {
         setTitle(getString(R.string.checkOut_title));
         ListView listView = findViewById(R.id.order_list);
         MenuBaseAdapter adapter = new MenuBaseAdapter(context, orderList);
@@ -112,8 +122,8 @@ public class CheckOutActivity extends AppCompatActivity {
         Log.e("orderList.size", orderList.size() + "");
     }
 
-//  region拆單
-    private ArrayList<Order> splitOrders(){
+    //  region拆單
+    private ArrayList<Order> splitOrders() {
         HashMap<String, Order> orderMap = new HashMap<>();
         //先加入第0筆cart資料進入HashMap(用Map純粹為了方便比較key)
         orderMap.put(cart.get(0).getHeadName() + cart.get(0).getBranchName(), new Order());
@@ -123,14 +133,14 @@ public class CheckOutActivity extends AppCompatActivity {
         for (int i = 0; i < cart.size(); i++) {
             int index = 0;
             for (String key : orderMap.keySet()) {
-                index ++;
-                if (key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName()) && i !=0) {
+                index++;
+                if (key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName()) && i != 0) {
                     orderMap.get(key).add(cart.get(i));
                     break;
 
-                //如果已經跑到最後一筆key而且key不相符時，即新增一筆Order進入Map
+                    //如果已經跑到最後一筆key而且key不相符時，即新增一筆Order進入Map
                 } else if (index == orderMap.size() &&
-                        !key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName())){
+                        !key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName())) {
                     orderMap.put(cart.get(i).getHeadName() + cart.get(i).getBranchName(), new Order());
                     orderMap.get(cart.get(i).getHeadName() + cart.get(i).getBranchName()).add(cart.get(i));
                     break;
@@ -142,14 +152,14 @@ public class CheckOutActivity extends AppCompatActivity {
 
 //  endregion
 
-//  region 處理訂單至資料庫
-    public void onCheckOutClick(View view){
+    //  region 處理訂單至資料庫
+    public void onCheckOutClick(View view) {
         showDialog("createOrder");
     }
 
-    public static void showDialog(String type){
+    public static void showDialog(String type) {
         final Context dialogContext = weakReference.get();
-        AlertDialog.Builder builder = new AlertDialog.Builder(dialogContext);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(dialogContext);
         builder.setIcon(android.R.drawable.ic_dialog_info)
                 .setCancelable(false);
         if (type.equals("createOrder")) {
@@ -173,13 +183,12 @@ public class CheckOutActivity extends AppCompatActivity {
                                     dialogInterface.dismiss();
                                 }
                             });
-        }else if (type.equals("createFinish")){
+        } else if (type.equals("createFinish")) {
             builder.setTitle(dialogContext.getString(R.string.checkOut_createOrderSuccess))
                     .setPositiveButton(dialogContext.getString(R.string.menu_confirm),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    ((Activity)dialogContext).finish();
                                     Intent intent = new Intent(dialogContext, MainActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     intent.putExtra("currentPage", 1);
@@ -187,28 +196,30 @@ public class CheckOutActivity extends AppCompatActivity {
                                     Cart.getInstance(dialogContext).clear();
                                     allowBack = true;
                                     orderCreated = false;
+                                    ((Activity) dialogContext).finish();
+                                    dialogInterface.dismiss();
                                 }
                             });
         }
         builder.create().show();
     }
 
-    private static void createOrders(){
+    private static void createOrders() {
         orderIndex = 0;
         db = new PhpDB(weakReference, new OrderHandler(weakReference));
         getOrderID();
         Log.e("等待資料回應:", new Date().toString());
     }
 
-    public static void getOrderID(){
+    public static void getOrderID() {
         db.getPairSet().setPairFunction(db.pairSet.phpSQLgetOrderNewId); //取新訂單
-        db.getPairSet().setPairSearch(1, Member.getInstance().getCustomerUserId());
+        db.getPairSet().setPairSearch(1, member.getCustomerUserId());
         Log.e("批次新增訂單開始時間:", new Date().toString());
-        Log.e("會員編號", Member.getInstance().getCustomerUserId() + "");
+        Log.e("會員編號", member.getCustomerUserId() + "");
         new Thread(db).start();
     }
 
-    public static void setOrderDetail(){
+    public static void setOrderDetail() {
         for (int i = 0; i < orderList.size(); i++) {
             for (int i2 = 0; i2 < orderList.get(i).size(); i2++) {
                 db = new PhpDB(weakReference, new OrderHandler(weakReference));
@@ -221,7 +232,7 @@ public class CheckOutActivity extends AppCompatActivity {
                 //BranchID
                 db.getPairSet().setPairSearch(4, String.valueOf(orderList.get(i).get(i2).getBranchId()));
                 //UserPhone
-                db.getPairSet().setPairSearch(6, Member.getInstance().getUserPhone());
+                db.getPairSet().setPairSearch(6, member.getUserPhone());
                 //TotalPrice
                 db.getPairSet().setPairSearch(11, String.valueOf(orderList.get(i).getTotalPrice()));
                 Log.e("批次新增第" + i + "筆訂單資料，開始時間", new Date().toString());
@@ -230,9 +241,9 @@ public class CheckOutActivity extends AppCompatActivity {
         }
     }
 
-    public static void setMenuDetail(){
+    public static void setMenuDetail() {
         menuIndex = 0;
-        for (Order order : orderList){
+        for (Order order : orderList) {
             order.setFinishTime();
         }
         for (int i = 0; i < orderList.size(); i++) {
@@ -256,17 +267,17 @@ public class CheckOutActivity extends AppCompatActivity {
         }
     }
 
-    private static class OrderHandler extends Handler{
+    private static class OrderHandler extends Handler {
         WeakReference weakReference;
 
-        OrderHandler(WeakReference weakReference){
+        OrderHandler(WeakReference weakReference) {
             this.weakReference = weakReference;
         }
 
         @Override
         public synchronized void handleMessage(Message msg) {
             Log.e("Handler 發送過來的訊息", msg.obj.toString());
-            if(db.getState()) {
+            if (db.getState()) {
                 Calendar calendar = Calendar.getInstance();
                 Log.e("資料回應時間", new Date().toString());
                 Log.e("回應副程式", db.getPairFunction());
@@ -285,11 +296,11 @@ public class CheckOutActivity extends AppCompatActivity {
                             setOrderDetail();
                             return;
                         }
-                    }else if (db.getPairFunction().equals(db.getPairSet().phpSQLsetOrderUpdate)){
+                    } else if (db.getPairFunction().equals(db.getPairSet().phpSQLsetOrderUpdate)) {
                         setMenuDetail();
 
-                    }else if (db.getPairFunction().equals(db.getPairSet().phpSQLnewOrderSub)){
-                        Cart cart = Cart.getInstance((Context)weakReference.get());
+                    } else if (db.getPairFunction().equals(db.getPairSet().phpSQLnewOrderSub)) {
+                        Cart cart = Cart.getInstance((Context) weakReference.get());
                         if (menuIndex == cart.size() && tmp.equals("true")) {
                             loadingDialog.closeDialog();
                             showDialog("createFinish");
@@ -301,9 +312,9 @@ public class CheckOutActivity extends AppCompatActivity {
             }
             //批次新增訂單
             if (db.getPairFunction().equals(db.getPairSet().phpSQLgetOrderNewId) &&
-                    orderIndex < orderList.size() - 1){
-                orderIndex ++;
-                Log.e("orderIndex", orderIndex+"");
+                    orderIndex < orderList.size() - 1) {
+                orderIndex++;
+                Log.e("orderIndex", orderIndex + "");
                 getOrderID();
 
             }
@@ -311,12 +322,29 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 //  endregion
 
-    private static void showOrdersDetail(){ //debug用
-        for(int i = 0; i < orderList.size(); i ++){
+    private static void showOrdersDetail() { //debug用
+        for (int i = 0; i < orderList.size(); i++) {
             Log.e("Order NO", i + "\n");
             Log.e("OrderID", orderList.get(i).getOrderId() + "\n");
             Log.e("OrderTotal", orderList.get(i).getTotalPrice() + "\n");
             Log.e("OrderDT", orderList.get(i).getOrderDT("read") + "\n\n");
         }
+    }
+
+    private Member findMemberFile() {
+        File fileDir = new File(String.valueOf(context.getFilesDir()) +
+                "/customer.txt");
+        String json = "";
+        Member member = Member.getInstance();
+        try {
+            FileReader fileReader = new FileReader(fileDir);
+            BufferedReader bReader = new BufferedReader(fileReader);
+            json = bReader.readLine();
+            bReader.close();
+            Log.e("Member_json", json);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new parseJSON(json, member).parse();
     }
 }

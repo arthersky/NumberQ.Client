@@ -58,6 +58,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
     public static final int FUNCTION_STORELIST = 2;
     public static final int FUNCTION_STORESEARCH = 3;
     public static final int FUNCTION_MAP_LOCATION = 4;
+    private static WeakReference<Context> weakReference;
     private int functionWork =-1;
     private MapView mapView;
     private GoogleMap gMap;
@@ -104,11 +105,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         setContentView(R.layout.layout_googlemap);
         context = this;
-
-        //取出上次位置
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        lat = location.getLatitude();
-        lng = location.getLongitude();
+        weakReference = new WeakReference<>(context);
 
         //連結Button功能
         bt1 = (Button) findViewById(R.id.gmap_button1);
@@ -119,8 +116,6 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         fab = (FloatingActionButton) findViewById(R.id.Map_fab_Location_btn);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        fab.setEnabled(false);
-        fab.startAnimation(animation); //開始動畫
         progressBar.setVisibility(ProgressBar.VISIBLE);
 
         bt1.setOnClickListener(new btnClickListener());
@@ -144,13 +139,12 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
         addFloatingActionButton();
 
-        //取得上一頁傳來命令 work=1 附近定位
         Bundle bundle = getIntent().getExtras();
 
         //取出上次位置 上一頁有傳過來則使用
         if (bundle.getDouble("lat") == 0 || bundle.getDouble("lng") == 0 )
         {
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             lat = location.getLatitude();
             lng = location.getLongitude();
             Log.e("上次經緯度資料","Lat:" + lat+" lng:"+lng);
@@ -168,7 +162,14 @@ public class Activity_GoogleMap extends AppCompatActivity {
             functionWork = FUNCTION_STORENEAR;
             refresh_Record(10, FUNCTION_STORENEAR, false);
 
-        }else{
+        }else if(bundle.getInt("work") == FUNCTION_STORESEARCH)
+        {
+            bLoc = true;
+            Log.e("onCreate","執行上一頁傳來搜尋特定店家命令");
+            functionWork = FUNCTION_STORESEARCH;
+            refresh_Record(10, FUNCTION_STORESEARCH, false,bundle.getString("storeName"));
+        }
+        else{
             fab.setEnabled(false);
             fab.startAnimation(animation); //開始動畫
             bLoc = false;
@@ -228,7 +229,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 tlng = Double.parseDouble(((PhpDB.ItemListRow) itemStoreList.get(i)).get("lng").toString());
 
                 String range = "" + GetDistance(tlat, tlng, lat, lng);
-                storeMarkList[i] = gMap.addMarker(new MarkerOptions().position(new LatLng(tlat, tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title(((PhpDB.ItemListRow) itemStoreList.get(position)).get("HeadName").toString() + " " + ((PhpDB.ItemListRow) itemStoreList.get(position)).get("BranchName").toString()).snippet("住址："+ ((PhpDB.ItemListRow)itemStoreList.get(position)).get("City")+((PhpDB.ItemListRow)itemStoreList.get(position)).get("Area")+((PhpDB.ItemListRow)itemStoreList.get(position)).get("Address") +"\n電話："+ ((PhpDB.ItemListRow)itemStoreList.get(position)).get("Phone")+"\n距離：" + range + " 公尺"));
+                storeMarkList[i] = gMap.addMarker(new MarkerOptions().position(new LatLng(tlat, tlng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).title(((PhpDB.ItemListRow) itemStoreList.get(i)).get("HeadName").toString() + " " + ((PhpDB.ItemListRow) itemStoreList.get(i)).get("BranchName").toString()).snippet("住址："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("City")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Area")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Address") +"\n電話："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("Phone")+"\n距離：" + range + " 公尺"));
             }
         }
     }
@@ -251,6 +252,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
             String range =""+GetDistance(tlat,tlng,lat,lng);
             //Log.e("makeRecyclerView","range:"+tlng+","+tlat+" / " +lng +","+lat +"=" + range);
+            Log.e("makeRecyclerView",((PhpDB.ItemListRow)itemStoreList.get(i)).get("HeadName") + " "+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("BranchName"));
             myDataset.add("店名：" + ((PhpDB.ItemListRow)itemStoreList.get(i)).get("HeadName") + " "+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("BranchName") +"\n住址："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("City")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Area")+((PhpDB.ItemListRow)itemStoreList.get(i)).get("Address") +"\n電話："+ ((PhpDB.ItemListRow)itemStoreList.get(i)).get("Phone")+"\n距離："+range + " 公尺"  );
         }
 
@@ -312,7 +314,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                     else
                     {
                         functionWork = FUNCTION_STORESEARCH;
-                        refresh_Record(FUNCTION_STORESEARCH);
+                        refresh_Record(10,FUNCTION_STORESEARCH,true,"八方"); // <= 應該從外部傳入
                     }
                     break;
                 default:
@@ -563,17 +565,17 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 //實驗性質
                 switch(functionWork) {
                     case FUNCTION_STORENEAR:
-                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        Log.e("執行 FUNCTION_STORENEAR", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
                         break;
                     case FUNCTION_STORELIST:
-                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        Log.e("執行 FUNCTION_STORELIST", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
                         break;
                     case FUNCTION_STORESEARCH:
-                        Log.e("執行 makeRecyclerView", "" + functionWork);
+                        Log.e("執行 FUNCTION_STORESEARCH", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
                         break;
@@ -590,17 +592,17 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
     private void refresh_Record()
     {
-        refresh_Record(10,0,true);
+        refresh_Record(10,0,true,"");
     }
-
     private void refresh_Record(int functionWork)
     {
-        refresh_Record(-1,functionWork,true);
+        refresh_Record(-1,functionWork,true,"");
     }
+    private void refresh_Record(int num,int functionWork,boolean showRecord) {refresh_Record(num,functionWork,showRecord,"");}
 
-    private void refresh_Record(int num,int functionWork,boolean showRecord)
+    private void refresh_Record(int num,int functionWork,boolean showRecord,String searchName)
     {
-        db = new PhpDB(new WeakReference(context), hd);
+        db = new PhpDB(weakReference, hd);
         showRecycleView = showRecord;
         if (!bLoc)
         {
@@ -616,40 +618,20 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 db.getPairSet().setPairNumLimit(num);
                 break;
             case FUNCTION_STORELIST:
+                db.getPairSet().setPairLatLng(lat, lng);
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLstoreList);
                 db.getPairSet().setPairNumLimit(-1);
                 break;
             case FUNCTION_STORESEARCH:
+                db.getPairSet().setPairLatLng(lat, lng);
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLstoreSearchByName);
-                db.getPairSet().setPairNumLimit(10);
-                db.getPairSet().setPairSearch(1,searchString);
+                db.getPairSet().setPairNumLimit(num);
+                db.getPairSet().setPairSearch(1,searchName);
                 break;
 
         }
 
         new Thread(db).start();
-    }
-
-    private void deleteSQLRecord()
-    {
-        new AlertDialog.Builder(context)
-                .setCancelable(false).
-                setTitle("刪除"+(String)(itemStoreList.get(position)).get("sname")+" ？")
-                .setIcon(android.R.drawable.ic_delete)
-                .setMessage("學號："+(String)(itemStoreList.get(position).get("sid"))+
-                        "\n年齡："+(String)(itemStoreList.get(position).get("sage")))
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //new DeleteSQL().start();
-                        dialog.dismiss();
-                    }
-                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).create().show();
     }
 
 

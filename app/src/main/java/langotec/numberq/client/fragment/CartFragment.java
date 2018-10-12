@@ -50,8 +50,7 @@ public class CartFragment extends Fragment {
         View cartView;
         if (cart.isEmpty()) {
             cartView = inflater.inflate(R.layout.fragment_empty, container, false);
-            ImageView emptyView = (ImageView) cartView.findViewById(R.id.cart_emptyImage);
-            TextView emptyText = (TextView) cartView.findViewById(R.id.cart_emptyText);
+            TextView emptyText = (TextView) cartView.findViewById(R.id.emptyText);
             emptyText.setText(getString(R.string.cart_isEmpty));
         //如果購物車有放東西時顯示fragment_cart頁面
         }else {

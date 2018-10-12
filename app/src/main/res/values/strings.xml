@@ -61,6 +61,7 @@
     <string name="phpSQLnewOrderSub">newOrderSub</string>
     <string name="phpSQLsetOrderSub">setOrderSub</string>
     <string name="phpSQLdelOrderSub">delOrderSub</string>
+    <string name="phpSQLtoJSON">json</string>
 
     phpSQLnewOrderSub
     phpSQLnewOrderSub
@@ -141,5 +142,7 @@
     <string name="dialog_loading">Loading</string>
     <string name="dialog_searchTitle">搜尋店家</string>
     <string name="dialog_searchMessage">請輸入店家名稱</string>
+
+    <string name="order_emptyOrders">您沒有已下訂商品</string>
 
 </resources>

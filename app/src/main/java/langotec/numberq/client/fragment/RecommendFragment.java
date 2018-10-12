@@ -87,24 +87,20 @@ public class RecommendFragment extends Fragment {
         fb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    //取得經緯度座標
-                    float latitude = (float) WelcomeActivity.currentLocation.getLatitude();
-                    float longitude = (float) WelcomeActivity.currentLocation.getLongitude();
-                    //建立URI字串
-                    String uri = String.format("geo:%f,%f?z=18", latitude, longitude);
-                    //建立Intent物件
-                    //Intent geoMap = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-                    //startActivity(geoMap);  // 啟動活動
-                    Intent intent = new Intent(getActivity(), Activity_GoogleMap.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("work", 1);//傳遞Int 直接呼叫顯示附近店家
-                    intent.putExtras(bundle);
-                    getActivity().startActivity(intent, ActivityOptions.
-                            makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
+                //取得經緯度座標
+                float latitude = (float) WelcomeActivity.currentLocation.getLatitude();
+                float longitude = (float) WelcomeActivity.currentLocation.getLongitude();
+                //建立URI字串
+                String uri = String.format("geo:%f,%f?z=18", latitude, longitude);
+                //建立Intent物件
+                //Intent geoMap = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                //startActivity(geoMap);  // 啟動活動
+                Intent intent = new Intent(context, Activity_GoogleMap.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("work", 1);//傳遞Int 直接呼叫顯示附近店家
+                intent.putExtras(bundle);
+                getActivity().startActivity(intent, ActivityOptions.
+                        makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
             }
         });
         return view;
@@ -142,7 +138,9 @@ public class RecommendFragment extends Fragment {
                             Intent intent = new Intent(getActivity(), Activity_GoogleMap.class);
                             Bundle bundle = new Bundle();
                             bundle.putInt("work", 3);//傳遞Int 直接呼叫顯示附近店家
-                            bundle.putString("searchString", editText.getText().toString());
+                            bundle.putString("storeName", editText.getText().toString());
+                            bundle.putDouble("lat", WelcomeActivity.lat);
+                            bundle.putDouble("lng", WelcomeActivity.lng);
                             intent.putExtras(bundle);
                             getActivity().startActivity(intent, ActivityOptions.
                                     makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
