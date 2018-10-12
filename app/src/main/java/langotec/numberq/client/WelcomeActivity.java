@@ -1,6 +1,7 @@
 package langotec.numberq.client;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,13 +21,13 @@ import android.widget.Toast;
 
 import langotec.numberq.client.dbConnect.StoreDBConn_OkhttpEnqueue;
 
-public class WelcomeActivity extends AppCompatActivity{
+public class WelcomeActivity extends AppCompatActivity {
 
     //Location
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 101;
     public static LocationManager lm;
     public static Location currentLocation = null;
-    public static Double lat = null , lng = null;
+    public static Double lat = null, lng = null;
     public LocationListener ll;
     private CountDownTimer timer;
     private Context context;
@@ -52,10 +54,9 @@ public class WelcomeActivity extends AppCompatActivity{
             lm.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     minTime, minDistance, ll);
-        }
-        catch(SecurityException sex) {
-            Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
-            Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
+        } catch (SecurityException sex) {
+            Log.e("GPS", "GPS權限失敗" + sex.getMessage());
+            Toast.makeText(this, "GPS權限失敗...使用預設位置", Toast.LENGTH_SHORT).show();
         }
         storeDBConn = new StoreDBConn_OkhttpEnqueue(context);
         countDownTimer();
@@ -66,8 +67,7 @@ public class WelcomeActivity extends AppCompatActivity{
         super.onPause();
         try {  // 取消註冊更新的傾聽者物件
             lm.removeUpdates(ll);
-        }
-        catch(SecurityException sex) {
+        } catch (SecurityException sex) {
             Log.e("GPS", "GPS權限失敗..." + sex.getMessage());
             Toast.makeText(this, "GPS權限失敗...", Toast.LENGTH_SHORT).show();
         }
@@ -90,14 +90,14 @@ public class WelcomeActivity extends AppCompatActivity{
         }
     }
 
-    private void GPSinitSetting(){
+    private void GPSinitSetting() {
         //Location
         //檢查版本和權限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
         }
         // 取得定位服務的LocationManager物件
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -119,7 +119,7 @@ public class WelcomeActivity extends AppCompatActivity{
         }
     }
 
-    private void countDownTimer(){
+    private void countDownTimer() {
         //計算10秒內沒衛星定位就用預設位置(台北車站)
         timer = new CountDownTimer(10000, 1000) {
             @Override
@@ -127,11 +127,15 @@ public class WelcomeActivity extends AppCompatActivity{
                 Log.e("lat", String.valueOf(lat));
                 Log.e("lng", String.valueOf(lng));
             }
+
+            @SuppressLint("MissingPermission")
             @Override
             public void onFinish() {
                 if (lat == null || lng == null){
                     lat = 25.0451;
                     lng = 121.517;
+                    Log.e("lat", String.valueOf(lat));
+                    Log.e("lng", String.valueOf(lng));
                 }
                 //DBConn
                 storeDBConn.setLatLng(String.valueOf(lat), String.valueOf(lng));
