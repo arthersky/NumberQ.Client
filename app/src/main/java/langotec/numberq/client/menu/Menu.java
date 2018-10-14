@@ -5,7 +5,6 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import java.io.Serializable;
-import java.util.Calendar;
 
 //實作Serializable，讓intent或bundle可以丟此物件或存檔
 public class Menu implements Serializable{
@@ -21,16 +20,18 @@ public class Menu implements Serializable{
 	private String from;
 	private String HeadId;
 	private String productId;
+	private String headImageURL;
 	private int waitNum, branchId;
 	private int quantityNum = 1;
 	private boolean available;
 	private final short MAXQUANTITY = 200; //最大單筆菜單可加入購物車數量
 
-	public Menu(String headName, String branchName, String HeadId, String productId,
+	public Menu(String headName, String branchName, String headImageURL, String HeadId, String productId,
                 String productType, String productName, String price, String image,
                 boolean available, String desc, String waitTime, int branchId) {
 		setHeadName(headName);
 		setBranchName(branchName);
+		setHeadImageURL(headImageURL);
 		setHeadId(HeadId);
 		setProductId(productId);
 		setType(productType);
@@ -182,6 +183,14 @@ public class Menu implements Serializable{
 	public void setProductId(String productId) {
 		this.productId = productId;
 	}
+
+    public String getHeadImageURL() {
+        return headImageURL;
+    }
+
+    public void setHeadImageURL(String headImageURL) {
+        this.headImageURL = headImageURL;
+    }
 //endregion
 
 	public void setImageView(ImageView imageView){

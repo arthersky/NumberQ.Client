@@ -143,6 +143,8 @@
     <string name="dialog_searchTitle">搜尋店家</string>
     <string name="dialog_searchMessage">請輸入店家名稱</string>
 
+    <string name="order_queryProcessing">資料查詢中…</string>
     <string name="order_emptyOrders">您沒有已下訂商品</string>
+    <string name="order_icon_refresh">更新定單內容</string>
 
 </resources>

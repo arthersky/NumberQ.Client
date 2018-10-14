@@ -138,7 +138,7 @@ public class PhpDB implements Runnable
         final String phpSQLuserList = context.getResources().getString(R.string.phpSQLuserList); //人員清單
         final String phpSQLuserSearchByEMAIL = context.getResources().getString(R.string.phpSQLuserSearchByEMAIL); //Email人員搜尋
         final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
-        final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
+        public final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
         public final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
         public final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
         final String phpSQLdelOrder = context.getResources().getString(R.string.phpSQLdelOrder); //訂單刪除
@@ -150,7 +150,7 @@ public class PhpDB implements Runnable
         final String phpSQLNumDefault  = context.getResources().getString(R.string.phpSQLNumDefault); //預設資料筆數
         final String phpSQLLatDefault  = context.getResources().getString(R.string.phpSQLLatDefault); //預設Lat
         final String phpSQLLngDefault  = context.getResources().getString(R.string.phpSQLLngDefault); //預設Lng
-        final String phpSQLSearch1  = context.getResources().getString(R.string.phpSQLSearch1); //s1
+        public final String phpSQLSearch1  = context.getResources().getString(R.string.phpSQLSearch1); //s1
         final String phpSQLSearch2  = context.getResources().getString(R.string.phpSQLSearch2); //s2
         final String phpSQLSearch3  = context.getResources().getString(R.string.phpSQLSearch3); //s3
         final String phpSQLSearch4  = context.getResources().getString(R.string.phpSQLSearch4); //s4

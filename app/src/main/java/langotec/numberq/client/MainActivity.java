@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
     //Fragments
     private RecommendFragment recommendFragment;
-    private OrderFragment orderFragment;
+    public static OrderFragment orderFragment;
     private MoreFragment moreFragment;
     private MenuItem prevMenuItem;
     /*為了讓AlertDialog裡的static方法能夠拿到cartFragment變數來更新
@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         menu.findItem(R.id.menu_backHome).setVisible(false);
         menu.findItem(R.id.menu_cart_clear).setVisible(false);
         menu.findItem(R.id.menu_cart_createOrder).setVisible(false);
+        menu.findItem(R.id.order_refresh).setVisible(false);
         return super.onPrepareOptionsMenu(menu);
     }
 

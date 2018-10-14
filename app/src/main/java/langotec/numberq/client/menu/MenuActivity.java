@@ -44,6 +44,7 @@ public class MenuActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
+        menu.findItem(R.id.order_refresh).setVisible(false);
         menu.findItem(R.id.search_button).setVisible(false);
         menu.findItem(R.id.menu_cart_clear).setVisible(false);
         menu.findItem(R.id.menu_cart_createOrder).setVisible(false);

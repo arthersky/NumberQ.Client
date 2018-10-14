@@ -17,10 +17,7 @@ import android.widget.ListView;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,9 +26,7 @@ import java.util.HashMap;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
-import langotec.numberq.client.dbConnect.CustomerDBConn;
 import langotec.numberq.client.dbConnect.parseJSON;
-import langotec.numberq.client.fragment.CartFragment;
 import langotec.numberq.client.login.Member;
 import langotec.numberq.client.map.PhpDB;
 
@@ -85,6 +80,7 @@ public class CheckOutActivity extends AppCompatActivity {
     //  region 例行性的OptionsMenu設定
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
+        menu.findItem(R.id.order_refresh).setVisible(false);
         menu.findItem(R.id.search_button).setVisible(false);
         menu.findItem(R.id.menu_cart_clear).setVisible(false);
         menu.findItem(R.id.menu_cart_createOrder).setVisible(false);
@@ -119,7 +115,6 @@ public class CheckOutActivity extends AppCompatActivity {
         ListView listView = findViewById(R.id.order_list);
         MenuBaseAdapter adapter = new MenuBaseAdapter(context, orderList);
         listView.setAdapter(adapter);
-        Log.e("orderList.size", orderList.size() + "");
     }
 
     //  region拆單
@@ -127,7 +122,7 @@ public class CheckOutActivity extends AppCompatActivity {
         HashMap<String, Order> orderMap = new HashMap<>();
         //先加入第0筆cart資料進入HashMap(用Map純粹為了方便比較key)
         orderMap.put(cart.get(0).getHeadName() + cart.get(0).getBranchName(), new Order());
-        orderMap.get(cart.get(0).getHeadName() + cart.get(0).getBranchName()).add(cart.get(0));
+        orderMap.get(cart.get(0).getHeadName() + cart.get(0).getBranchName()).getMenuList().add(cart.get(0));
 
         //再比較key值是否與Cart內的店名相同
         for (int i = 0; i < cart.size(); i++) {
@@ -135,19 +130,27 @@ public class CheckOutActivity extends AppCompatActivity {
             for (String key : orderMap.keySet()) {
                 index++;
                 if (key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName()) && i != 0) {
-                    orderMap.get(key).add(cart.get(i));
+                    orderMap.get(key).getMenuList().add(cart.get(i));
                     break;
 
                     //如果已經跑到最後一筆key而且key不相符時，即新增一筆Order進入Map
                 } else if (index == orderMap.size() &&
                         !key.equals(cart.get(i).getHeadName() + cart.get(i).getBranchName())) {
                     orderMap.put(cart.get(i).getHeadName() + cart.get(i).getBranchName(), new Order());
-                    orderMap.get(cart.get(i).getHeadName() + cart.get(i).getBranchName()).add(cart.get(i));
+                    orderMap.get(cart.get(i).getHeadName() + cart.get(i).getBranchName())
+                            .getMenuList().add(cart.get(i));
                     break;
                 }
             }
         }
-        return new ArrayList<>(orderMap.values());
+        ArrayList<Order> orderList = new ArrayList<>(orderMap.values());
+        //順便設定Order物件的一些參數
+        for (Order order : orderList){
+            order.setHeadName(order.getMenuList().get(0).getHeadName());
+            order.setBranchName(order.getMenuList().get(0).getBranchName());
+            order.setFrom("fromCheckOutActivity");
+        }
+        return orderList;
     }
 
 //  endregion
@@ -220,21 +223,34 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 
     public static void setOrderDetail() {
+        //已經建立訂單後設定Order物件的結束時間
+        for (Order order : orderList) {
+            order.setFinishTime();
+        }
         for (int i = 0; i < orderList.size(); i++) {
-            for (int i2 = 0; i2 < orderList.get(i).size(); i2++) {
+            for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
                 db = new PhpDB(weakReference, new OrderHandler(weakReference));
                 //新增訂單內部份資料
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLsetOrderUpdate);
                 //OrderID
                 db.getPairSet().setPairSearch(1, orderList.get(i).getOrderId());
                 //HeadID
-                db.getPairSet().setPairSearch(3, orderList.get(i).get(i2).getHeadId());
+                db.getPairSet().setPairSearch(3, orderList.get(i).getMenuList().get(i2).getHeadId());
                 //BranchID
-                db.getPairSet().setPairSearch(4, String.valueOf(orderList.get(i).get(i2).getBranchId()));
+                db.getPairSet().setPairSearch(4, String.valueOf(orderList.get(i).
+                        getMenuList().get(i2).getBranchId()));
                 //UserPhone
                 db.getPairSet().setPairSearch(6, member.getUserPhone());
+                //PayCheck設定已付款
+                db.getPairSet().setPairSearch(10, "1");
                 //TotalPrice
                 db.getPairSet().setPairSearch(11, String.valueOf(orderList.get(i).getTotalPrice()));
+                //orderDT(orderCreatedTime)
+                db.getPairSet().setPairSearch(13,
+                        orderList.get(orderIndex).getOrderDT("whatever"));
+                //orderGetDT(finishTime)
+                db.getPairSet().setPairSearch(14,
+                        orderList.get(orderIndex).getFinishTime("whatever"));
                 Log.e("批次新增第" + i + "筆訂單資料，開始時間", new Date().toString());
                 new Thread(db).start();
             }
@@ -243,11 +259,8 @@ public class CheckOutActivity extends AppCompatActivity {
 
     public static void setMenuDetail() {
         menuIndex = 0;
-        for (Order order : orderList) {
-            order.setFinishTime();
-        }
         for (int i = 0; i < orderList.size(); i++) {
-            for (int i2 = 0; i2 < orderList.get(i).size(); i2++) {
+            for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
                 menuIndex++;
                 db = new PhpDB(weakReference, new OrderHandler(weakReference));
                 //訂單菜單新增
@@ -255,12 +268,13 @@ public class CheckOutActivity extends AppCompatActivity {
                 //OrderID
                 db.getPairSet().setPairSearch(1, orderList.get(i).getOrderId());
                 //productId 產品代號 同一個訂單不允許產品代碼重複
-                db.getPairSet().setPairSearch(2, orderList.get(i).get(i2).getProductId());
+                db.getPairSet().setPairSearch(2, orderList.get(i).getMenuList().
+                        get(i2).getProductId());
                 //quantity 數量
                 db.getPairSet().setPairSearch(3, String.valueOf(
-                        orderList.get(i).get(i2).getQuantityNum()));
+                        orderList.get(i).getMenuList().get(i2).getQuantityNum()));
                 //price 價格
-                db.getPairSet().setPairSearch(4, orderList.get(i).get(i2).getPrice());
+                db.getPairSet().setPairSearch(4, orderList.get(i).getMenuList().get(i2).getPrice());
                 Log.e("批次新增第" + i + "筆菜單，開始時間", new Date().toString());
                 new Thread(db).start();
             }
@@ -316,7 +330,6 @@ public class CheckOutActivity extends AppCompatActivity {
                 orderIndex++;
                 Log.e("orderIndex", orderIndex + "");
                 getOrderID();
-
             }
         }
     }

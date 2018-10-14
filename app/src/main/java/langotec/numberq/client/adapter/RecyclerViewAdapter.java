@@ -69,8 +69,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 @Override
                 public void onClick(View v) {
                     Store s = (Store) data.get(position);
-                    menuDBConn = new MenuDBConn(s. getHeadName(),
-                            s.getBranchName(), s.getBranchId(), context);
+                    menuDBConn = new MenuDBConn(s.getHeadName(), s.getBranchName(), s.getHeadImg(),
+                            s.getBranchId(), context);
                     menuDBConn.execute();
                 }
             });

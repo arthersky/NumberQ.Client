@@ -27,7 +27,7 @@ public class MenuBaseAdapter extends BaseAdapter {
 	private ArrayList data;
 	private LayoutInflater mInflater;
 
-	MenuBaseAdapter(Context context, ArrayList data) {
+	public MenuBaseAdapter(Context context, ArrayList data) {
 		this.context = context;
 		this.data = data;
 		mInflater = LayoutInflater.from(context);
@@ -81,36 +81,40 @@ public class MenuBaseAdapter extends BaseAdapter {
 			}
             final Order order = (Order) getItem(position);
             String str[] = setTextLoop(order);
-            //順便設定此筆訂單的總額
-            order.setTotalPrice(Integer.parseInt(str[3]));
-			//設定單一訂單標題
-            final Menu menu = ((Order) data.get(position)).get(0);
-			if (menu.getHeadName().equals("鼎泰豐"))
-				holder.imageView.setImageResource(R.drawable.ding);
-			else
-				holder.imageView.setImageResource(R.drawable.bafun);
-
-			holder.textName.setText(menu.getHeadName() + " - " + menu.getBranchName());
             holder.textMenuName.setText(str[0]);
             holder.textQuantity.setText(str[1]);
             holder.textPrice.setText(str[2]);
-            holder.textTotal.setText(context.getString(R.string.menu_totalPrice) + str[3]);
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(context, context.getResources().
-                            getString(R.string.checkOut_click),Toast.LENGTH_SHORT).show();
-                }
-            });
-            convertView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    showDialog(position);
-                    return false;
-                }
-            });
+
+            if (order.getFrom().equals("fromCheckOutActivity")) {
+                //順便設定此筆訂單的總額
+                order.setTotalPrice(Integer.parseInt(str[3]));
+                //設定顯示項目
+                order.setImageView(holder.imageView);
+                holder.textName.setText(order.getHeadName() + " - " + order.getBranchName());
+                holder.textTotal.setText(context.getString(R.string.menu_totalPrice) + str[3]);
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(context, context.getResources().
+                                getString(R.string.checkOut_click),Toast.LENGTH_SHORT).show();
+                    }
+                });
+                convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        showDialog(position);
+                        return false;
+                    }
+                });
+                CheckOutActivity.orderList = data;
+            }
+            else if (order.getFrom().equals("fromDB")){
+                order.setImageView(holder.imageView);
+                holder.textName.setText(order.getHeadName() + " - " + order.getBranchName());
+                holder.textTotal.setText(String.valueOf(
+                        context.getString(R.string.menu_totalPrice) + order.getTotalPrice()));
+            }
 		}
-        CheckOutActivity.orderList = data;
 		return convertView;
 	}
 
@@ -132,15 +136,23 @@ public class MenuBaseAdapter extends BaseAdapter {
 	//製造可以正確排列顯示菜單內容的字串陣列
 	private String[] setTextLoop(Order order){
 	    String str[] = new String[]{"", "", "", ""};
-	    int total = 0;
-        for (int i = 0; i < order.size(); i++) {
-            Menu menu = order.get(i);
-            str[0] += String.valueOf(i + 1) + ": " + menu.getProductName() + "\n";
-            str[1] += context.getString(R.string.menu_quantity) + menu.getQuantityNum() + "\n";
-            str[2] += context.getString(R.string.menu_singlePrice) + menu.getPrice() + "\n";
-            total += Integer.parseInt(menu.getPrice()) * menu.getQuantityNum();
+	    if (order.getFrom().equals("fromCheckOutActivity")) {
+            int total = 0;
+            for (int i = 0; i < order.getMenuList().size(); i++) {
+                Menu menu = order.getMenuList().get(i);
+                str[0] += String.valueOf(i + 1) + ": " + menu.getProductName() + "\n";
+                str[1] += context.getString(R.string.menu_quantity) + menu.getQuantityNum() + "\n";
+                str[2] += context.getString(R.string.menu_singlePrice) + menu.getPrice() + "\n";
+                total += Integer.parseInt(menu.getPrice()) * menu.getQuantityNum();
+            }
+            str[3] += String.valueOf(total);
+        }else if (order.getFrom().equals("fromDB")){
+            for (int i = 0; i < order.getProductName().size(); i++) {
+                str[0] += String.valueOf(i + 1) + ": " + order.getProductName().get(i) + "\n";
+                str[1] += context.getString(R.string.menu_quantity) + order.getQuantity().get(i) + "\n";
+                str[2] += context.getString(R.string.menu_singlePrice) + order.getSumPrice().get(i) + "\n";
+            }
         }
-        str[3] += String.valueOf(total);
 	    return str;
     }
 
@@ -155,7 +167,7 @@ public class MenuBaseAdapter extends BaseAdapter {
                     public void onClick(DialogInterface dialog, int which) {
                         //移除Cart內被選中的店家的Menu
                         Cart cart = Cart.getInstance(context);
-                        Menu menu = ((Order)data.get(position)).get(0);
+                        Menu menu = ((Order)data.get(position)).getMenuList().get(0);
                         for (int i = 0 ; i < cart.size(); i++) {
                             if (cart.get(i).getHeadName().equals(menu.getHeadName()) &&
                                     cart.get(i).getBranchName().equals(menu.getBranchName())) {
@@ -163,7 +175,6 @@ public class MenuBaseAdapter extends BaseAdapter {
                                 i--;
                             }
                         }
-                        Log.e("Cart.size", cart.size()+"");
                         //移除選定的Order
                         data.remove(position);
                         //更新Adapter的畫面

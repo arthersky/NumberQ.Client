@@ -27,16 +27,17 @@ import okhttp3.Response;
 
 public class MenuDBConn extends AsyncTask<Void, Void, Void> {
     private String qResult = "no record";
-    private String headName, branchName;
+    private String headName, branchName, headImageURL;
     private int branchId;
     public LoadingDialog loadingDialog;
     private WeakReference<Context> activityReference;
     private ArrayList<Menu> menuList = new ArrayList<>(); // 袋子放所有抓出來的資料
     private static final String Q_SERVER_MENU = "https://ivychiang0304.000webhostapp.com/numberq/menuquery.php";
 
-    public MenuDBConn(String headName, String branchName, int branchId, Context context) {
+    public MenuDBConn(String headName, String branchName, String headImageURL, int branchId, Context context) {
         this.headName = headName;
         this.branchName = branchName;
+        this.headImageURL = headImageURL;
         this.branchId = branchId;
         activityReference = new WeakReference<>(context);
     }
@@ -137,7 +138,7 @@ public class MenuDBConn extends AsyncTask<Void, Void, Void> {
                 String waitTime = jsObj.getString("waitingTime");
                 boolean available = Integer.parseInt(jsObj.getString("available")) != 0;
                 String description = jsObj.getString("description");
-                Menu menu = new Menu(HeadName, branchName, HeadId, productId, productType, productName,
+                Menu menu = new Menu(HeadName, branchName, headImageURL, HeadId, productId, productType, productName,
                         price, image, available, description, waitTime, branchId);
                 menuList.add(menu);
             }

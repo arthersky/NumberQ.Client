@@ -30,4 +30,11 @@
         android:title="@string/menuItem_clearAll"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/order_refresh"
+        android:icon="@drawable/ic_order_refresh_24dp"
+        android:orderInCategory="4"
+        android:title="@string/order_icon_refresh"
+        app:showAsAction="ifRoom"/>
+
 </menu>

@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +27,6 @@ import langotec.numberq.client.menu.CheckOutActivity;
 public class CartFragment extends Fragment {
 
     private Cart cart;
-    private RecyclerViewAdapter cartAdapter;
 
     public CartFragment() {
         // Required empty public constructor
@@ -55,7 +53,7 @@ public class CartFragment extends Fragment {
         //如果購物車有放東西時顯示fragment_cart頁面
         }else {
             cartView = inflater.inflate(R.layout.fragment_cart, container, false);
-            cartAdapter = new RecyclerViewAdapter(cart);
+            RecyclerViewAdapter cartAdapter = new RecyclerViewAdapter(cart);
             LinearLayoutManager manager = new LinearLayoutManager(getActivity());
             RecyclerView cartRecycler = (RecyclerView) cartView.findViewById(R.id.cart_recyclerView);
             cartRecycler.setAdapter(cartAdapter);
@@ -82,6 +80,7 @@ public class CartFragment extends Fragment {
         menu.findItem(R.id.search_button).setVisible(false);
         menu.findItem(R.id.menu_cart_clear).setVisible(true);
         menu.findItem(R.id.menu_cart_createOrder).setVisible(true);
+        menu.findItem(R.id.order_refresh).setVisible(false);
     }
 
     @Override

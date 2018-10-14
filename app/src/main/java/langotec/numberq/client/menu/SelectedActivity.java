@@ -70,6 +70,7 @@ public class SelectedActivity extends AppCompatActivity {
     //region 處理標題列的部分
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
+        menu.findItem(R.id.order_refresh).setVisible(false);
         menu.findItem(R.id.search_button).setVisible(false);
         menu.findItem(R.id.menu_cart_clear).setVisible(false);
         menu.findItem(R.id.menu_cart_createOrder).setVisible(false);
@@ -242,10 +243,10 @@ public class SelectedActivity extends AppCompatActivity {
 
     private Menu getNewMenu(){
         //強制製造一個新的相同Menu實體，防止物件指標重複指到相同Menu
-        return new Menu(menu.getHeadName(), menu.getBranchName(),
-                menu.getHeadId(), menu.getProductId(), menu.getType(),
-                menu.getProductName(), menu.getPrice(), menu.getImageURL(),
-                menu.isAvailable(), menu.getDesc(), menu.getWaitTime(), menu.getBranchId());
+        return new Menu(menu.getHeadName(), menu.getBranchName(), menu.getHeadImageURL(),
+                menu.getHeadId(), menu.getProductId(), menu.getType(), menu.getProductName(),
+                menu.getPrice(), menu.getImageURL(), menu.isAvailable(), menu.getDesc(),
+                menu.getWaitTime(), menu.getBranchId());
     }
     //endregion
 

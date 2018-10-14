@@ -150,7 +150,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageButton
-            android:id="@+id/cartButton"
+            android:id="@+id/checkOutButton"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/btn_background"
@@ -167,11 +167,11 @@
             android:layout_height="wrap_content"
             android:text="@string/menu_putInCart"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/cartButton"
-            app:layout_constraintEnd_toStartOf="@+id/cartButton"
+            app:layout_constraintBottom_toTopOf="@+id/checkOutButton"
+            app:layout_constraintEnd_toStartOf="@+id/checkOutButton"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/cartButton"
-            app:layout_constraintTop_toBottomOf="@+id/cartButton" />
+            app:layout_constraintStart_toEndOf="@+id/checkOutButton"
+            app:layout_constraintTop_toBottomOf="@+id/checkOutButton" />
 
         <TextView
             android:id="@+id/totalText"
@@ -180,9 +180,9 @@
             android:layout_marginEnd="16dp"
             android:text="TextView"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/cartButton"
-            app:layout_constraintEnd_toEndOf="@+id/cartButton"
-            app:layout_constraintTop_toBottomOf="@+id/cartButton" />
+            app:layout_constraintBottom_toTopOf="@+id/checkOutButton"
+            app:layout_constraintEnd_toEndOf="@+id/checkOutButton"
+            app:layout_constraintTop_toBottomOf="@+id/checkOutButton" />
 
     </android.support.constraint.ConstraintLayout>
 

@@ -92,6 +92,7 @@ public class MoreFragment extends Fragment {
         super.onPrepareOptionsMenu(menu);
         //在此fragment拿掉search_button這個item
         menu.findItem(R.id.search_button).setVisible(false);
+        menu.findItem(R.id.order_refresh).setVisible(false);
     }
 
     private void setLayout() {
