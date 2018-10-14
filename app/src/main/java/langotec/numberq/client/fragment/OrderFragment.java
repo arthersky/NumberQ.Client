@@ -61,7 +61,6 @@ public class OrderFragment extends Fragment {
         member = findMemberFile();
         setHasOptionsMenu(true);
         queryOrder();
-//        orderList = CheckOutActivity.orderList;
 
     }
 
@@ -73,7 +72,7 @@ public class OrderFragment extends Fragment {
             orderView = inflater.inflate(R.layout.fragment_empty, container, false);
             TextView emptyText = (TextView) orderView.findViewById(R.id.emptyText);
             emptyText.setText(getString(R.string.order_queryProcessing));
-        }else if (orderList.size() == 0){
+        }else if (!Member.getInstance().checkLogin(getContext()) || orderList.size() == 0){
             orderView = inflater.inflate(R.layout.fragment_empty, container, false);
             TextView emptyText = (TextView) orderView.findViewById(R.id.emptyText);
             emptyText.setText(getString(R.string.order_emptyOrders));
@@ -124,7 +123,7 @@ public class OrderFragment extends Fragment {
             BufferedReader bReader = new BufferedReader(fileReader);
             json = bReader.readLine();
             bReader.close();
-//            Log.e("Member_json", json);
+            Log.e("Member_json", json);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,14 +149,15 @@ public class OrderFragment extends Fragment {
         @Override
         public synchronized void handleMessage(Message msg) {
             Log.e("Handler 發送過來的訊息", msg.obj.toString());
+            orderList = new ArrayList<>();
             if (phpDB.getState()) {
                 Log.e("資料回應時間", new Date().toString());
                 Log.e("回應副程式", phpDB.getPairFunction());
                 if (phpDB.getPairFunction().equals(phpDB.getPairSet().phpSQLorderMSList)) {
                     parseOrderJSON(phpDB.getJSONData());
-                    refreshOrder();
                 }
             }
+            refreshOrder();
         }
     }
 
@@ -168,12 +168,11 @@ public class OrderFragment extends Fragment {
     }
 
     public static void parseOrderJSON(JSONArray ja){
-        orderList = new ArrayList<>();
         for (int i = 0; i < ja.length(); i++) {
             boolean flag = false;
             try {
                 JSONObject jsObj = ja.getJSONObject(i);
-                Log.e("jsObj", jsObj.toString());
+//                Log.e("jsObj", jsObj.toString());
                 String orderId = jsObj.getString("orderId");
                 String productName = jsObj.getString("productName");
                 String quantity = jsObj.getString("quantity");
