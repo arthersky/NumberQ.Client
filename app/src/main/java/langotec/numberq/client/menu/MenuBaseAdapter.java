@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,6 @@ import java.util.ArrayList;
 
 import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
-import langotec.numberq.client.adapter.RecyclerViewAdapter;
 
 public class MenuBaseAdapter extends BaseAdapter {
 
@@ -75,6 +72,8 @@ public class MenuBaseAdapter extends BaseAdapter {
                 holder.textQuantity = (TextView) convertView.findViewById(R.id.order_quantity);
 				holder.textPrice = (TextView) convertView.findViewById(R.id.order_singlePrice);
 				holder.textTotal = (TextView) convertView.findViewById(R.id.order_totalPrice);
+				holder.textStatus = (TextView) convertView.findViewById(R.id.order_status);
+				holder.textFinishTime = (TextView) convertView.findViewById(R.id.order_finishTime);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
@@ -92,6 +91,7 @@ public class MenuBaseAdapter extends BaseAdapter {
                 order.setImageView(holder.imageView);
                 holder.textName.setText(order.getHeadName() + " - " + order.getBranchName());
                 holder.textTotal.setText(context.getString(R.string.menu_totalPrice) + str[3]);
+                holder.textFinishTime.setVisibility(View.GONE);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -113,6 +113,28 @@ public class MenuBaseAdapter extends BaseAdapter {
                 holder.textName.setText(order.getHeadName() + " - " + order.getBranchName());
                 holder.textTotal.setText(String.valueOf(
                         context.getString(R.string.menu_totalPrice) + order.getTotalPrice()));
+                holder.textFinishTime.setText(context.getString(R.string.order_finishTime) +
+                        "\t" + order.getOrderGetDT("whatever"));
+                String[] orderStatus = context.getResources().getStringArray(R.array.order_statusArray);
+                String status;
+                switch (order.getPayCheck()){
+                    case 1:
+                        status = orderStatus[1];
+                        break;
+                    case 2:
+                        status = orderStatus[2];
+                        break;
+                    case 3:
+                        status = orderStatus[3];
+                        break;
+                    case 4:
+                        status = orderStatus[4];
+                        break;
+                    default:
+                        status = "unknown";
+                        break;
+                }
+                holder.textStatus.setText(context.getString(R.string.order_status) + "\t" + status);
             }
 		}
 		return convertView;
@@ -204,5 +226,7 @@ public class MenuBaseAdapter extends BaseAdapter {
         TextView textMenuName;
         TextView textQuantity;
         TextView textTotal;
+        TextView textStatus;
+        TextView textFinishTime;
     }
 }

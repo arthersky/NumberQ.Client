@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 public class OrderCountDown extends Service{
 
-    private boolean isChecked = false;
-    private CountDownTimer countDownTimer;
+    private ArrayList orderList;
 
     @Nullable
     @Override
@@ -19,33 +22,35 @@ public class OrderCountDown extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        if (isChecked){
-            //無窮迴圈
-            while(true){
-                countDownTimer();
-                // if DB return finish{
-                //      stopSelf();
-                // }
-            }
-        }
+        Log.i("myLog","onStartCommand");
+        orderList = (ArrayList)intent.getSerializableExtra("orderList");
+        new Thread(new RefreshOrderTime()).start();
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void countDownTimer(){
-        //計算30秒
-        countDownTimer = new CountDownTimer
-                (30000,1000) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e("orderCountDown", "onDestroy()");
+    }
 
-            @Override
-            public void onTick(long l) {
-
+    private class RefreshOrderTime implements Runnable{
+        @Override
+        public void run() {
+            int i = 0;
+            while (true){
+                i++;
+                Log.e("ThreadIsRunning", new Date().toString());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (i == 30){
+                    stopSelf();
+                    break;
+                }
             }
-
-            @Override
-            public void onFinish() {
-                //check DB return order status
-            }
-        }.start();
+        }
     }
 }

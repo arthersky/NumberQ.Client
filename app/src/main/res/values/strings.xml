@@ -133,6 +133,8 @@
     <string name="checkOut_dialog_message">按下確定後即成立訂單囉</string>
     <string name="checkOut_creatingOrders">訂單建立中…</string>
     <string name="checkOut_createOrderSuccess">成功建立訂單</string>
+    <string name="checkOut_createOrderFailure">建立訂單失敗</string>
+    <string name="checkOut_createOrderRetry">系統未扣款，請重新結帳</string>
 
     <string name="connFail_noConn">目前無法連線</string>
     <string name="connFail_check">請檢查您的網路設定，謝謝您</string>
@@ -146,5 +148,14 @@
     <string name="order_queryProcessing">資料查詢中…</string>
     <string name="order_emptyOrders">您沒有已下訂商品</string>
     <string name="order_icon_refresh">更新定單內容</string>
+    <array name="order_statusArray">
+        <item>未付費</item>
+        <item>已付款</item>
+        <item>製作中</item>
+        <item>可取餐</item>
+        <item>已取餐</item>
+    </array>
+    <string name="order_status">訂單目前狀態:</string>
+    <string name="order_finishTime">預計取餐時間:</string>
 
 </resources>

@@ -158,7 +158,7 @@ public class Order implements Serializable {
         this.orderId = orderId;
     }
 
-    public int isPayCheck() {
+    public int getPayCheck() {
         return payCheck;
     }
 
@@ -267,7 +267,7 @@ public class Order implements Serializable {
         return orderGetDT;
     }
 
-    public String getFinishTime(String str){
+    public String getOrderGetDT(String str){
         return String.valueOf(
                 orderGetDT.get(Calendar.YEAR) + "-" +
                 setDigit(orderGetDT.get(Calendar.MONTH) + 1) + "-" +
@@ -282,18 +282,18 @@ public class Order implements Serializable {
         this.orderGetDT = parseStringToCalendar(orderGetDT);
     }
 
-    private String setDigit(int str){
-        String value = String.valueOf(str);
-        return value.length() == 2 ? value : "0"+value;
-    }
-
-    public void setFinishTime(){
+    public void setOrderGetDT(){
         orderGetDT = Calendar.getInstance();
         orderGetDT.setTime(orderDT.getTime());
         for(Menu m : menuList){
             orderGetDT.add(Calendar.MINUTE,
                     Integer.parseInt(m.getWaitTime()) * m.getQuantityNum());
         }
+    }
+
+    private String setDigit(int str){
+        String value = String.valueOf(str);
+        return value.length() == 2 ? value : "0"+value;
     }
 
     private Calendar parseStringToCalendar(String DT){

@@ -29,6 +29,7 @@ import langotec.numberq.client.R;
 import langotec.numberq.client.dbConnect.parseJSON;
 import langotec.numberq.client.login.Member;
 import langotec.numberq.client.map.PhpDB;
+import langotec.numberq.client.service.OrderCountDown;
 
 public class CheckOutActivity extends AppCompatActivity {
 
@@ -156,6 +157,7 @@ public class CheckOutActivity extends AppCompatActivity {
 //  endregion
 
     //  region 處理訂單至資料庫
+    //  TODO 判斷建立訂單失敗的邏輯似乎不OK
     public void onCheckOutClick(View view) {
         showDialog("createOrder");
     }
@@ -165,7 +167,7 @@ public class CheckOutActivity extends AppCompatActivity {
         final AlertDialog.Builder builder = new AlertDialog.Builder(dialogContext);
         builder.setIcon(android.R.drawable.ic_dialog_info)
                 .setCancelable(false);
-        if (type.equals("createOrder")) {
+        if (type.equals("createOrder")) {//按下GPay結帳的提醒
             builder.setTitle(dialogContext.getString(R.string.checkOut_dialog_title))
                     .setMessage(dialogContext.getString(R.string.checkOut_dialog_message))
                     .setPositiveButton(dialogContext.getString(R.string.menu_confirm),
@@ -186,7 +188,7 @@ public class CheckOutActivity extends AppCompatActivity {
                                     dialogInterface.dismiss();
                                 }
                             });
-        } else if (type.equals("createFinish")) {
+        } else if (type.equals("createFinish")) {//順利建立訂單後的顯示
             builder.setTitle(dialogContext.getString(R.string.checkOut_createOrderSuccess))
                     .setPositiveButton(dialogContext.getString(R.string.menu_confirm),
                             new DialogInterface.OnClickListener() {
@@ -199,7 +201,19 @@ public class CheckOutActivity extends AppCompatActivity {
                                     Cart.getInstance(dialogContext).clear();
                                     allowBack = true;
                                     orderCreated = false;
+                                    dialogInterface.dismiss();
                                     ((Activity) dialogContext).finish();
+                                }
+                            });
+        }else if (type.equals("createFailure")) {//建立訂單失敗的顯示
+            builder.setTitle(dialogContext.getString(R.string.checkOut_createOrderFailure))
+                    .setMessage(dialogContext.getString(R.string.checkOut_createOrderRetry))
+                    .setPositiveButton(dialogContext.getString(R.string.menu_cancel),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    allowBack = true;
+                                    orderCreated = false;
                                     dialogInterface.dismiss();
                                 }
                             });
@@ -209,7 +223,7 @@ public class CheckOutActivity extends AppCompatActivity {
 
     private static void createOrders() {
         orderIndex = 0;
-        db = new PhpDB(weakReference, new OrderHandler(weakReference));
+        db = new PhpDB(weakReference, new OrderHandler());
         getOrderID();
         Log.e("等待資料回應:", new Date().toString());
     }
@@ -225,11 +239,11 @@ public class CheckOutActivity extends AppCompatActivity {
     public static void setOrderDetail() {
         //已經建立訂單後設定Order物件的結束時間
         for (Order order : orderList) {
-            order.setFinishTime();
+            order.setOrderGetDT();
         }
         for (int i = 0; i < orderList.size(); i++) {
             for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
-                db = new PhpDB(weakReference, new OrderHandler(weakReference));
+                db = new PhpDB(weakReference, new OrderHandler());
                 //新增訂單內部份資料
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLsetOrderUpdate);
                 //OrderID
@@ -250,7 +264,7 @@ public class CheckOutActivity extends AppCompatActivity {
                         orderList.get(orderIndex).getOrderDT("whatever"));
                 //orderGetDT(finishTime)
                 db.getPairSet().setPairSearch(14,
-                        orderList.get(orderIndex).getFinishTime("whatever"));
+                        orderList.get(orderIndex).getOrderGetDT("whatever"));
                 Log.e("批次新增第" + i + "筆訂單資料，開始時間", new Date().toString());
                 new Thread(db).start();
             }
@@ -261,8 +275,7 @@ public class CheckOutActivity extends AppCompatActivity {
         menuIndex = 0;
         for (int i = 0; i < orderList.size(); i++) {
             for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
-                menuIndex++;
-                db = new PhpDB(weakReference, new OrderHandler(weakReference));
+                db = new PhpDB(weakReference, new OrderHandler());
                 //訂單菜單新增
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLnewOrderSub);
                 //OrderID
@@ -282,12 +295,7 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 
     private static class OrderHandler extends Handler {
-        WeakReference weakReference;
-
-        OrderHandler(WeakReference weakReference) {
-            this.weakReference = weakReference;
-        }
-
+        Context context = weakReference.get();
         @Override
         public synchronized void handleMessage(Message msg) {
             Log.e("Handler 發送過來的訊息", msg.obj.toString());
@@ -311,15 +319,24 @@ public class CheckOutActivity extends AppCompatActivity {
                             return;
                         }
                     } else if (db.getPairFunction().equals(db.getPairSet().phpSQLsetOrderUpdate)) {
-                        setMenuDetail();
-
+                        if (tmp.equals("true")) {
+                            setMenuDetail();
+                        }else {
+                            createOrderFailure("phpSQLsetOrderUpdate");
+                        }
                     } else if (db.getPairFunction().equals(db.getPairSet().phpSQLnewOrderSub)) {
-                        Cart cart = Cart.getInstance((Context) weakReference.get());
+                        menuIndex++;
+                        Cart cart = Cart.getInstance(context);
                         if (menuIndex == cart.size() && tmp.equals("true")) {
                             loadingDialog.closeDialog();
                             showDialog("createFinish");
                             showOrdersDetail();
                             orderCreated = true;
+                            Intent intent = new Intent(context, OrderCountDown.class);
+                            intent.putExtra("orderList", orderList);
+                            context.startService(intent);
+                        }else if (menuIndex == cart.size() && !tmp.equals("true")){
+                            createOrderFailure("phpSQLnewOrderSub");
                         }
                     }
                 }
@@ -333,7 +350,12 @@ public class CheckOutActivity extends AppCompatActivity {
             }
         }
     }
-//  endregion
+    private static void createOrderFailure(String where){
+        loadingDialog.closeDialog();
+        showDialog("createFailure");
+        Log.e("createOrderFailure", where);
+    }
+    //  endregion
 
     private static void showOrdersDetail() { //debug用
         for (int i = 0; i < orderList.size(); i++) {
