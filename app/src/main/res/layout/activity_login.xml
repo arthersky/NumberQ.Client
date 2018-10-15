@@ -9,30 +9,23 @@
 
     <EditText
         android:id="@+id/etEmail"
-        android:layout_width="0dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="67dp"
-        android:layout_marginStart="67dp"
-        android:layout_marginTop="73dp"
+        android:layout_marginTop="40dp"
         android:hint="Email"
         android:inputType="textEmailAddress"
         android:textSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/etPass"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etPass"
-        android:layout_width="0dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="67dp"
-        android:layout_marginStart="67dp"
         android:hint="Password"
         android:inputType="textPassword"
         android:textSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnLogin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etEmail" />
@@ -41,70 +34,55 @@
         android:id="@+id/btnLogin"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
 
+        android:layout_marginTop="28dp"
         android:text="登入"
         android:textColor="#0000ff"
-        app:layout_constraintBottom_toTopOf="@+id/btnReg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etPass" />
 
     <Button
         android:id="@+id/btnPassforget"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_marginEnd="74dp"
-        android:layout_marginStart="67dp"
-        android:layout_marginTop="275dp"
+        android:layout_marginBottom="32dp"
         android:text="忘記密碼?"
         android:textColor="#ff0000"
         app:layout_constraintBottom_toTopOf="@+id/imageView1"
-        app:layout_constraintEnd_toStartOf="@+id/btnReg"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/imageView1" />
 
     <Button
         android:id="@+id/btnReg"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
 
-        android:layout_marginEnd="67dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="32dp"
         android:text="註冊會員?"
         android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/imageView2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnPassforget"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+        app:layout_constraintStart_toStartOf="@+id/imageView2" />
 
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="52dp"
-        android:layout_marginEnd="61dp"
-        android:layout_marginStart="69dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginStart="64dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnPassforget"
-        app:srcCompat="@drawable/line" />
+        app:srcCompat="@drawable/icon_line" />
 
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="105dp"
-        android:layout_height="114dp"
-        android:layout_marginBottom="49dp"
-        android:layout_marginEnd="62dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="64dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView1"
-        app:layout_constraintTop_toBottomOf="@+id/btnReg"
-        app:srcCompat="@drawable/facebook" />
+        app:srcCompat="@drawable/icon_facebook" />
 
 
 </android.support.constraint.ConstraintLayout>

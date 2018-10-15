@@ -119,8 +119,8 @@ public class MakeQRcode extends AppCompatActivity {
             hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
 
             // 產生QR code
-            Bitmap bitmap = encoder.encodeBitmap(src, BarcodeFormat.QR_CODE, 500, 500);
-            ivQR.setImageBitmap(addLogo(bitmap));
+            Bitmap bitmap = encoder.encodeBitmap(src, BarcodeFormat.QR_CODE, 200, 200);
+            ivQR.setImageBitmap(bitmap);
 //            showStr(bitmap);
         } catch(WriterException e){
             e.printStackTrace();
