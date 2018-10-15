@@ -157,5 +157,6 @@
     </array>
     <string name="order_status">訂單目前狀態:</string>
     <string name="order_finishTime">預計取餐時間:</string>
+    <string name="order_takeOut">外帶</string>
 
 </resources>

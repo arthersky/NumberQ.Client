@@ -1,6 +1,5 @@
 package langotec.numberq.client.map;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.http.AndroidHttpClient;
 import android.os.Handler;
@@ -22,6 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import langotec.numberq.client.R;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 //2018-09-21 (Fri)
 //分成 一.PhpDB主程序功能與傳入參數選擇  子物件 1.參數物件  子物件 2.連線+字串解析+輸出輸入物件
@@ -74,6 +77,8 @@ public class PhpDB implements Runnable
     public void setPairSet(PairSet tpairSet){ pairSet = tpairSet;}
     //返回是否JSON
     public boolean isJSON(){return pairSet.isJSON();}
+    //傳回自己
+    public PhpDB getThis(){return this;}
 
     //Thread 依照初始設定執行模組
     public void run()
@@ -319,8 +324,7 @@ public class PhpDB implements Runnable
         //private HashMap<String,Object> newItem;
         //public ArrayList<ItemListRow> getItemListSet() { return itemListSet; }
         private Handler dataHandler = null;
-
-
+        OkHttpClient okHttpClient;
         AndroidHttpClient androidHttpClient =null;
 
         //建構子
@@ -349,10 +353,62 @@ public class PhpDB implements Runnable
 
             if (null != dataHandler ) {
                 Message msg = new Message();
-                msg.obj = "ready";
+                //msg.obj = "ready";
+                msg.obj = getThis();
                 dataHandler.sendMessage(msg);
             }
         }
+
+
+        //============================OK Http=================================================
+        //連線物件設定與回傳
+
+        private okhttp3.Response getPHPOkConnection(String pairWork)
+        {
+            return getPHPOkConnection(pairSet.getServerURL(),pairSet.getSelectURL(),pairWork);
+        }
+        //連線物件設定與回傳 多形
+        private okhttp3.Response getPHPOkConnection(String serverURL,String fileURL,String pairWork)
+        {
+
+            try
+            {
+                //參數選擇 空的就使用預設值(查詢)
+                if (pairWork.equals("")) {pairSet.setPairDefault(); }
+                else{pairSet.setPairFunction(pairWork);}
+
+                Log.e("getPHPOkConnection",serverURL+fileURL);
+                Log.e("getPHPOkConnection",pairSet.getAll().toString());
+
+                if (okHttpClient == null) okHttpClient = new OkHttpClient();
+                FormBody.Builder builder = new FormBody.Builder();
+
+                if (pairSet.pairs.size()>0)
+                {
+                    for(int i=0;i< pairSet.pairs.size();i++)
+                    {
+                        builder.add(pairSet.pairs.get(i).getName(),pairSet.pairs.get(i).getValue());
+                    }
+                }
+                RequestBody formBody = builder.build();
+                Request request = new Request.Builder()
+                        .url(serverURL+fileURL)
+                        .post(formBody)
+                        .build();
+
+                return okHttpClient.newCall(request).execute();
+
+            }catch(Exception ex) {
+                Log.e("getPHPOkConnection","getPHPOkConnection 資料回傳錯誤");
+                return null;
+            }
+        }
+
+        //============================OK Http================================================
+
+
+
+        //============================ Android Http================================================
         //連線物件設定與回傳
         private HttpResponse getPHPConnection(String pairWork)
         {
@@ -427,6 +483,48 @@ public class PhpDB implements Runnable
             return jsonArray;
         }
 
+        public JSONArray getOkJSON()                             //--OkHTTP
+        {
+            try{
+                jsonArray = getOkJSON(getPHPOkConnection(""));
+                if (jsonArray.length() >0) blReady = true;
+                Log.e("getJSON","取得長度:"+jsonArray.length());
+            }catch(Exception ex){
+                Log.e("getJSON()",ex.toString());
+                jsonArray= null;
+            }
+            return jsonArray;
+        }
+
+        public JSONArray getOkJSON(okhttp3.Response response)              //  ---OkHTTP
+        {
+            try {
+                StringBuilder sb = new StringBuilder();
+
+                Log.e("getOkDate","讀取狀態: "+response.message());
+                if (response.code()==200)
+                {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream()));
+                    String readLine;
+
+                    while (((readLine = br.readLine()) != null)) {
+                        sb.append(readLine);
+                        //Log.e("getJSON",readLine);
+                    }
+                    jsonArray = new JSONArray(sb.toString());
+                }
+            }
+            catch(Exception ex) {
+                Log.e("getJSON","資料讀取失敗:" + ex.toString());
+                response.body().close();
+                okHttpClient = null;
+            }
+            response.body().close();
+            okHttpClient = null;
+            return jsonArray;
+        }
+
+
         //這一段才是執行的核心
         public ArrayList<ItemListRow> getData()
         {
@@ -442,9 +540,29 @@ public class PhpDB implements Runnable
             return itemListSet;
         }
 
+        //這一段才是執行的核心 -OkHTTP 版本
+        public ArrayList<ItemListRow> getOkData()
+        {
+            try {
+                //取連線物件 並從連線成功的物件中處理收到的資料
+                itemListSet = getOkDate( getPHPOkConnection(""));
+                if (itemListSet.size() >0) blReady = true;
+                Log.e("getData 取得筆數",""+itemListSet.size());
+            }catch(Exception ex)
+            {
+                ex.printStackTrace();
+            }
+            return itemListSet;
+        }
+
+
         //多形 處理收到的資料讀入 ItemListRow 的集合中 預設第一欄讀取欄位名稱
         private ArrayList<ItemListRow> getDate(HttpResponse response)
         { return getDate(response,true); }
+
+        //多形 處理收到的資料讀入 ItemListRow 的集合中 預設第一欄讀取欄位名稱 -OkHTTP
+        private ArrayList<ItemListRow> getOkDate(okhttp3.Response response)
+        { return getOkDate(response,true); }
 
         //多形 處理收到的資料讀入 ItemListRow 的集合中 visTitle 第一欄讀取欄位名稱
         private ArrayList<ItemListRow> getDate(HttpResponse response,Boolean visTitle )
@@ -488,6 +606,50 @@ public class PhpDB implements Runnable
             }
             androidHttpClient.close();
             androidHttpClient = null;
+            return itemListSet;
+        }
+
+        //多形 處理收到的資料讀入 ItemListRow 的集合中 visTitle 第一欄讀取欄位名稱 ----------OkHTTP
+        private ArrayList<ItemListRow> getOkDate(okhttp3.Response response,Boolean visTitle )
+        {
+            try {
+                String[] item_Field_String = null;
+                itemListSet = new ArrayList<ItemListRow>();
+
+                Log.e("getOkDate","讀取狀態: "+response.message());
+                if (response.code()==200)
+                {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream()));
+                    String readLine;
+
+                    //顯示欄位名稱
+                    if (visTitle == true)
+                    {
+                        //第一次是取欄位名稱
+                        readLine = br.readLine();
+                        if (readLine == null) Log.e("讀取狀態","讀取不到資料!!");
+                        item_Field_String = readLine.split(","); //欄位名稱
+                    }
+
+                    while (((readLine = br.readLine()) != null)) {
+                        String[] item_String = readLine.split(",");
+                        ItemListRow itemListRow = new ItemListRow();
+
+                        for (int i = 0; i < item_String.length; i++) {
+                            if (visTitle == true){itemListRow.add(item_Field_String[i], item_String[i]);}
+                            else {itemListRow.add("" + i, item_String[i]);}
+                        }
+                        itemListSet.add(itemListRow);
+                    }
+                }
+            }
+            catch(Exception ex) {
+                Log.e("getDate","資料讀取失敗:" + ex.toString());
+                response.body().close();
+                okHttpClient = null;
+            }
+            response.body().close();
+            okHttpClient = null;
             return itemListSet;
         }
     }

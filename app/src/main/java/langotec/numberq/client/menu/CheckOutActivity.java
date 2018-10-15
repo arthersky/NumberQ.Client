@@ -15,6 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -258,6 +261,8 @@ public class CheckOutActivity extends AppCompatActivity {
                 //BranchID
                 db.getPairSet().setPairSearch(4, String.valueOf(orderList.get(i).
                         getMenuList().get(i2).getBranchId()));
+                //DeliveryType
+                db.getPairSet().setPairSearch(5, weakReference.get().getString(R.string.order_takeOut));
                 //UserPhone
                 db.getPairSet().setPairSearch(6, member.getUserPhone());
                 //PayCheck設定已付款
@@ -300,20 +305,22 @@ public class CheckOutActivity extends AppCompatActivity {
         Context context = weakReference.get();
         @Override
         public synchronized void handleMessage(Message msg) {
-            Log.e("Handler 發送過來的訊息", msg.obj.toString());
-            if (db.getState()) {
+            PhpDB tmpDB = ((PhpDB)(msg.obj));
+            Log.e("","Handler 發送過來的訊息：" + tmpDB.getState());
+
+            if(tmpDB.getState()){
                 Log.e("資料回應時間", new Date().toString());
-                Log.e("回應副程式", db.getPairFunction());
+                Log.e("回應副程式",tmpDB.getPairFunction());
                 String tmp = "";
-                for (int y = 0; y < db.getRowSize(); y++) {
-                    for (Object key : ((PhpDB.ItemListRow) db.getDataSet().get(y)).getAll().keySet()) {
+                for (int y = 0; y < tmpDB.getRowSize(); y++) {
+                    for (Object key : ((PhpDB.ItemListRow) tmpDB.getDataSet().get(y)).getAll().keySet()) {
                         if (tmp.length() > 0)
                             tmp += ",";
-                        tmp += ((PhpDB.ItemListRow) db.getDataSet().get(y)).get(key.toString()).toString();
+                        tmp += ((PhpDB.ItemListRow) tmpDB.getDataSet().get(y)).get(key.toString()).toString();
                     }
                     Log.e("=========Debug=======", tmp);
                     String[] orderIDandTime = tmp.split(",");
-                    if (db.getPairFunction().equals(db.getPairSet().phpSQLgetOrderNewId)) {
+                    if (tmpDB.getPairFunction().equals(tmpDB.getPairSet().phpSQLgetOrderNewId)) {
                         Log.e("orderIndex", orderIndex + "");
                         orderList.get(orderIndex).setOrderDT(orderIDandTime[0]);
                         orderList.get(orderIndex).setOrderId(orderIDandTime[1]);
@@ -322,14 +329,16 @@ public class CheckOutActivity extends AppCompatActivity {
                             setOrderDetail();
                             return;
                         }
-                    } else if (db.getPairFunction().equals(db.getPairSet().phpSQLsetOrderUpdate)) {
-                        if (tmp.equals("true")) {
+                    } else if (tmpDB.getPairFunction().equals(tmpDB.getPairSet().phpSQLsetOrderUpdate)) {
+                        orderIndex++;
+                        if (orderIndex == orderList.size() && tmp.equals("true")) {
                             setMenuDetail();
-                        }else {
+                        }else if(!tmp.equals("true")){
                             createOrderFailure("phpSQLsetOrderUpdate");
                         }
-                    } else if (db.getPairFunction().equals(db.getPairSet().phpSQLnewOrderSub)) {
+                    } else if (tmpDB.getPairFunction().equals(tmpDB.getPairSet().phpSQLnewOrderSub)) {
                         menuIndex++;
+                        Log.e("menuIndex", String.valueOf(menuIndex));
                         Cart cart = Cart.getInstance(context);
                         if (menuIndex == cart.size() && tmp.equals("true")) {
                             loadingDialog.closeDialog();
@@ -339,7 +348,7 @@ public class CheckOutActivity extends AppCompatActivity {
                             Intent intent = new Intent(context, OrderCountDown.class);
                             intent.putExtra("orderList", orderList);
                             context.startService(intent);
-                        }else if (menuIndex == cart.size() && !tmp.equals("true")){
+                        }else if(!tmp.equals("true")){
                             createOrderFailure("phpSQLnewOrderSub");
                         }
                     }
@@ -350,7 +359,7 @@ public class CheckOutActivity extends AppCompatActivity {
 //                createOrderFailure("db.getState() != true");
 //            }
             //批次新增訂單
-            if (db.getPairFunction().equals(db.getPairSet().phpSQLgetOrderNewId) &&
+            if (tmpDB.getPairFunction().equals(tmpDB.getPairSet().phpSQLgetOrderNewId) &&
                     orderIndex < orderList.size() - 1) {
                 orderIndex++;
                 Log.e("orderIndex", orderIndex + "");
@@ -358,6 +367,7 @@ public class CheckOutActivity extends AppCompatActivity {
             }
         }
     }
+
     private static void createOrderFailure(String where){
         loadingDialog.closeDialog();
         showDialog("createFailure");

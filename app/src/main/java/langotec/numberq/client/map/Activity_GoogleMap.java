@@ -1,9 +1,7 @@
 package langotec.numberq.client.map;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
@@ -31,6 +29,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -52,8 +51,7 @@ import java.util.Locale;
 
 import langotec.numberq.client.R;
 
-
-public class Activity_GoogleMap extends AppCompatActivity {
+public class Activity_GoogleMap extends AppCompatActivity implements SearchView.OnQueryTextListener {
     public static final int FUNCTION_STORENEAR = 1;
     public static final int FUNCTION_STORELIST = 2;
     public static final int FUNCTION_STORESEARCH = 3;
@@ -86,7 +84,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
     private LinearLayout mapinfo_panel;
     private TextView mapinfo;
-    private String searchString;
+    protected SearchView sv;
     //------------------------
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +173,60 @@ public class Activity_GoogleMap extends AppCompatActivity {
             bLoc = false;
 
         }
+
+        sv=(SearchView)findViewById(R.id.searchView);
+        //sv.setIconifiedByDefault(false);
+        sv.setIconified(false);
+        sv.setOnQueryTextListener(this);
+        sv.setQueryHint("餐廳關鍵字");
+        sv.setVisibility(View.INVISIBLE);
+        sv.setOnCloseListener( new SearchView.OnCloseListener(){
+            @Override
+            public boolean onClose() {
+               sv.setVisibility(View.INVISIBLE);
+               return true;
+             }
+        });
     }
+
+    private void setButton(boolean setflag)
+    {
+        bt1.setEnabled(setflag);
+        bt2.setEnabled(setflag);
+        bt3.setEnabled(setflag);
+        fab.setEnabled(setflag);
+    }
+
+
+    //搜尋Bar/*
+    /*@Override
+    public void onBackPressed() {
+        Log.e("BackPress","close");
+        if (!sv.isIconified()) {
+            sv.setIconified(true);
+
+        } else {
+            super.onBackPressed();
+        }
+    }*/
+
+    //搜尋Bar
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        // TODO Auto-generated method stub
+        setButton(false);
+        //Toast.makeText(this, "您選擇的是："+query, Toast.LENGTH_SHORT).show();
+        sv.setVisibility(View.INVISIBLE);
+        functionWork = FUNCTION_STORESEARCH;
+        refresh_Record(10,FUNCTION_STORESEARCH,true,query); // <= 應該從外部傳入
+        return true;
+    }
+    //搜尋Bar 自動完成 目前沒設置
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return true;
+    }
+
 
     //Google Map相關===================================================
     //重新設定Map Mark備註資料使其可以印出多行
@@ -266,12 +317,14 @@ public class Activity_GoogleMap extends AppCompatActivity {
         if (showRecycleView==true) mRecyclerView.setVisibility(View.VISIBLE);
         else mRecyclerView.setVisibility(View.INVISIBLE);
         Log.e("ShowRecycle",""+showRecycleView);
+        setButton(true);
     }
 
     //button的點選事件
     class btnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
+            sv.setVisibility(View.INVISIBLE);
             switch (view.getId()) {
                 //附近店家
                 case R.id.gmap_button1:
@@ -283,12 +336,14 @@ public class Activity_GoogleMap extends AppCompatActivity {
                     }
                     else
                     {
+                        setButton(false);
                         functionWork = FUNCTION_STORENEAR;
                         refresh_Record(10,FUNCTION_STORENEAR,true);
                     }
 
                     break;
-                //所有店家
+
+                //搜尋店家
                 case R.id.gmap_button2:
                     Log.e("button2","button2");
                     bLoc =false;
@@ -296,10 +351,13 @@ public class Activity_GoogleMap extends AppCompatActivity {
                     {
                         mRecyclerView.setVisibility(View.INVISIBLE);
                     }
+                    else if (sv.getVisibility() == View.INVISIBLE)
+                    {
+                        sv.setVisibility(View.VISIBLE);
+                    }
                     else
                     {
-                        functionWork = FUNCTION_STORELIST;
-                        refresh_Record(FUNCTION_STORELIST);
+                        sv.setVisibility(View.INVISIBLE);
                     }
                     break;
 
@@ -313,8 +371,9 @@ public class Activity_GoogleMap extends AppCompatActivity {
                     }
                     else
                     {
-                        functionWork = FUNCTION_STORESEARCH;
-                        refresh_Record(10,FUNCTION_STORESEARCH,true,"八方"); // <= 應該從外部傳入
+                        setButton(false);
+                        functionWork = FUNCTION_STORELIST;
+                        refresh_Record(FUNCTION_STORELIST);
                     }
                     break;
                 default:
@@ -334,7 +393,7 @@ public class Activity_GoogleMap extends AppCompatActivity {
                 userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
                 setProgressBarIndeterminateVisibility(true); // turn progress on
                 setProgressBarVisibility(true);
-                fab.setEnabled(false);
+                setButton(false);
                 locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, myLocationListener, null);
                 locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, myLocationListener, null);
                 fab.startAnimation(animation);
@@ -432,13 +491,12 @@ public class Activity_GoogleMap extends AppCompatActivity {
 
                 userLocMark = gMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("現在位置").snippet(getAddress(new LatLng(lat,lng))));
                 gMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(new LatLng(lat, lng)).zoom(16).bearing(0).tilt(25).build()));
-                fab.clearAnimation();;
-                fab.setEnabled(true);
-
+                fab.clearAnimation();
             }
             // 關閉處理中圖示
             setProgressBarVisibility(false);
             setProgressBarIndeterminateVisibility(false);
+            setButton(true);
         }
 
         @Override
@@ -568,16 +626,19 @@ public class Activity_GoogleMap extends AppCompatActivity {
                         Log.e("執行 FUNCTION_STORENEAR", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
+                        setButton(true);
                         break;
                     case FUNCTION_STORELIST:
                         Log.e("執行 FUNCTION_STORELIST", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
+                        setButton(true);
                         break;
                     case FUNCTION_STORESEARCH:
                         Log.e("執行 FUNCTION_STORESEARCH", "" + functionWork);
                         makeRecyclerView();
                         makeStoreListOnMap();
+                        setButton(true);
                         break;
                     default:
                         Log.e("handleMessage","未知的命令");
