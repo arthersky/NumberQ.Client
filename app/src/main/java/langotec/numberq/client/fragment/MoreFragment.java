@@ -88,6 +88,12 @@ public class MoreFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        System.gc();
+    }
+
+    @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         //在此fragment拿掉search_button這個item

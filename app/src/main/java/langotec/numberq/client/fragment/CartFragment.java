@@ -71,6 +71,7 @@ public class CartFragment extends Fragment {
     public void onPause() {
         super.onPause();
         cart.saveCartFile(getContext());
+        System.gc();
     }
 
     @Override

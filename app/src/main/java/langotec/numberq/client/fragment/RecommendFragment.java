@@ -114,6 +114,7 @@ public class RecommendFragment extends Fragment {
             mAdapter.menuDBConn.cancel(true);
             mAdapter.menuDBConn.loadingDialog.closeDialog();
         }
+        System.gc();
     }
 
     @Override

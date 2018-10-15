@@ -135,6 +135,15 @@ public class MenuBaseAdapter extends BaseAdapter {
                         break;
                 }
                 holder.textStatus.setText(context.getString(R.string.order_status) + "\t" + status);
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent();
+                        intent.putExtra("orderId",order.getOrderId());
+                        intent.setClass(context, MakeQRcode.class);
+                        context.startActivity(intent);
+                    }
+                });
             }
 		}
 		return convertView;

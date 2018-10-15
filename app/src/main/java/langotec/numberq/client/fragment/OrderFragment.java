@@ -48,6 +48,7 @@ public class OrderFragment extends Fragment {
     private static PhpDB phpDB;
     private static WeakReference<Context> weakReference;
     private static Member member;
+    private static OrderHandler orderHandler;
     public static OrderFragment orderFragment;
 
     public OrderFragment() {
@@ -58,6 +59,7 @@ public class OrderFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         weakReference = new WeakReference<>(getContext());
+        orderHandler = new OrderHandler();
         member = findMemberFile();
         setHasOptionsMenu(true);
         queryOrder();
@@ -91,7 +93,14 @@ public class OrderFragment extends Fragment {
         orderFragment = this;
     }
 
-//  region
+    @Override
+    public void onPause() {
+        super.onPause();
+        orderHandler.removeCallbacksAndMessages(null);
+        System.gc();
+    }
+
+    //  region
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -131,7 +140,7 @@ public class OrderFragment extends Fragment {
     }
 
     private void queryOrder(){
-        phpDB = new PhpDB(weakReference, new OrderHandler(weakReference));
+        phpDB = new PhpDB(weakReference, orderHandler);
         phpDB.getPairSet().setPairFunction(phpDB.pairSet.phpSQLorderMSList); //查詢完整定單資料
         phpDB.getPairSet().setPairSearch(2, member.getCustomerUserId()); //使用者ID查詢
         phpDB.getPairSet().setPairJSON();
@@ -140,12 +149,6 @@ public class OrderFragment extends Fragment {
     }
 
     private static class OrderHandler extends Handler {
-        WeakReference weakReference;
-
-        OrderHandler(WeakReference weakReference) {
-            this.weakReference = weakReference;
-        }
-
         @Override
         public synchronized void handleMessage(Message msg) {
             Log.e("Handler 發送過來的訊息", msg.obj.toString());
@@ -163,8 +166,10 @@ public class OrderFragment extends Fragment {
 
     public static void refreshOrder(){
         Fragment fragment = OrderFragment.orderFragment;
-        fragment.getFragmentManager().beginTransaction().detach(fragment)
-                .attach(fragment).commit();
+        if (fragment.isResumed()) {
+            fragment.getFragmentManager().beginTransaction().detach(fragment)
+                    .attach(fragment).commit();
+        }
     }
 
     public static void parseOrderJSON(JSONArray ja){
@@ -173,10 +178,10 @@ public class OrderFragment extends Fragment {
             try {
                 JSONObject jsObj = ja.getJSONObject(i);
 //                Log.e("jsObj", jsObj.toString());
-                String orderId = jsObj.getString("orderId");
-                String productName = jsObj.getString("productName");
-                String quantity = jsObj.getString("quantity");
-                String sumPrice = jsObj.getString("sumprice");
+                String orderId = jsObj.optString("orderId");
+                String productName = jsObj.optString("productName");
+                String quantity = jsObj.optString("quantity");
+                String sumPrice = jsObj.optString("sumprice");
 
                 for (int i2 = 0; i2 < orderList.size(); i2++){
                     Order indexOrder = orderList.get(i2);
@@ -190,23 +195,23 @@ public class OrderFragment extends Fragment {
                 }
                 if (flag)
                     continue;
-                String headName = jsObj.getString("HeadName");
-                String branchName = jsObj.getString("BranchName");
-                String headImg = jsObj.getString("Headimg");
-                String userId = jsObj.getString("userId");
-                String HeadId = jsObj.getString("HeadId");
-                String BranchId = jsObj.getString("BranchId");
-                String deliveryType = jsObj.getString("deliveryType");
-                String contactPhone = jsObj.getString("contactPhone");
-                String deliveryAddress = jsObj.getString("deliveryAddress");
-                String taxId = jsObj.getString("taxId");
-                String payWay = jsObj.getString("payWay");
-                int payCheck = Integer.parseInt(jsObj.getString("payCheck"));
-                int totalPrice = Integer.parseInt(jsObj.getString("totalPrice"));
-                String comment = jsObj.getString("comment");
+                String headName = jsObj.optString("HeadName");
+                String branchName = jsObj.optString("BranchName");
+                String headImg = jsObj.optString("Headimg");
+                String userId = jsObj.optString("userId");
+                String HeadId = jsObj.optString("HeadId");
+                String BranchId = jsObj.optString("BranchId");
+                String deliveryType = jsObj.optString("deliveryType");
+                String contactPhone = jsObj.optString("contactPhone");
+                String deliveryAddress = jsObj.optString("deliveryAddress");
+                String taxId = jsObj.optString("taxId");
+                String payWay = jsObj.optString("payWay");
+                int payCheck = Integer.parseInt(jsObj.optString("payCheck"));
+                int totalPrice = Integer.parseInt(jsObj.optString("totalPrice"));
+                String comment = jsObj.optString("comment");
 //                String userName = jsObj.getString("userName");
-                String orderDT = jsObj.getString("orderDT");
-                String orderGetDT = jsObj.getString("orderGetDT");
+                String orderDT = jsObj.optString("orderDT");
+                String orderGetDT = jsObj.optString("orderGetDT");
                 Order order = new Order(
                         headImg, orderId, userId, HeadId, BranchId, headName, branchName,
                         deliveryType,

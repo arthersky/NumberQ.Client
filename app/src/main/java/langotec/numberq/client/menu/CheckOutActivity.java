@@ -36,6 +36,7 @@ public class CheckOutActivity extends AppCompatActivity {
     private Cart cart;
     private Context context;
     private static LoadingDialog loadingDialog;
+    private static AlertDialog alertDialog;
     private static WeakReference<Context> weakReference;
     private static PhpDB db;
     private static Member member;
@@ -185,7 +186,7 @@ public class CheckOutActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
+                                    alertDialog.dismiss();
                                 }
                             });
         } else if (type.equals("createFinish")) {//順利建立訂單後的顯示
@@ -194,14 +195,15 @@ public class CheckOutActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    allowBack = true;
+                                    orderCreated = false;
+                                    alertDialog.dismiss();
+                                    loadingDialog.closeDialog();
                                     Intent intent = new Intent(dialogContext, MainActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     intent.putExtra("currentPage", 1);
                                     dialogContext.startActivity(intent);
                                     Cart.getInstance(dialogContext).clear();
-                                    allowBack = true;
-                                    orderCreated = false;
-                                    dialogInterface.dismiss();
                                     ((Activity) dialogContext).finish();
                                 }
                             });
@@ -212,13 +214,16 @@ public class CheckOutActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    loadingDialog.closeDialog();
                                     allowBack = true;
                                     orderCreated = false;
-                                    dialogInterface.dismiss();
+                                    alertDialog.dismiss();
                                 }
                             });
         }
-        builder.create().show();
+        alertDialog = builder.create();
+        if (!alertDialog.isShowing())
+            alertDialog.show();
     }
 
     private static void createOrders() {
@@ -259,9 +264,6 @@ public class CheckOutActivity extends AppCompatActivity {
                 db.getPairSet().setPairSearch(10, "1");
                 //TotalPrice
                 db.getPairSet().setPairSearch(11, String.valueOf(orderList.get(i).getTotalPrice()));
-                //orderDT(orderCreatedTime)
-                db.getPairSet().setPairSearch(13,
-                        orderList.get(orderIndex).getOrderDT("whatever"));
                 //orderGetDT(finishTime)
                 db.getPairSet().setPairSearch(14,
                         orderList.get(orderIndex).getOrderGetDT("whatever"));
@@ -300,19 +302,21 @@ public class CheckOutActivity extends AppCompatActivity {
         public synchronized void handleMessage(Message msg) {
             Log.e("Handler 發送過來的訊息", msg.obj.toString());
             if (db.getState()) {
-                Calendar calendar = Calendar.getInstance();
                 Log.e("資料回應時間", new Date().toString());
                 Log.e("回應副程式", db.getPairFunction());
                 String tmp = "";
                 for (int y = 0; y < db.getRowSize(); y++) {
                     for (Object key : ((PhpDB.ItemListRow) db.getDataSet().get(y)).getAll().keySet()) {
-                        tmp = ((PhpDB.ItemListRow) db.getDataSet().get(y)).get(key.toString()).toString();
+                        if (tmp.length() > 0)
+                            tmp += ",";
+                        tmp += ((PhpDB.ItemListRow) db.getDataSet().get(y)).get(key.toString()).toString();
                     }
                     Log.e("=========Debug=======", tmp);
+                    String[] orderIDandTime = tmp.split(",");
                     if (db.getPairFunction().equals(db.getPairSet().phpSQLgetOrderNewId)) {
                         Log.e("orderIndex", orderIndex + "");
-                        orderList.get(orderIndex).setOrderId(tmp);
-                        orderList.get(orderIndex).setOrderDT(calendar);
+                        orderList.get(orderIndex).setOrderDT(orderIDandTime[0]);
+                        orderList.get(orderIndex).setOrderId(orderIDandTime[1]);
                         if (orderIndex == orderList.size() - 1) {
                             orderIndex = 0;
                             setOrderDetail();
@@ -341,6 +345,10 @@ public class CheckOutActivity extends AppCompatActivity {
                     }
                 }
             }
+//            else {
+//                Log.e("db.getState()", db.getState() + "");
+//                createOrderFailure("db.getState() != true");
+//            }
             //批次新增訂單
             if (db.getPairFunction().equals(db.getPairSet().phpSQLgetOrderNewId) &&
                     orderIndex < orderList.size() - 1) {
@@ -362,7 +370,8 @@ public class CheckOutActivity extends AppCompatActivity {
             Log.e("Order NO", i + "\n");
             Log.e("OrderID", orderList.get(i).getOrderId() + "\n");
             Log.e("OrderTotal", orderList.get(i).getTotalPrice() + "\n");
-            Log.e("OrderDT", orderList.get(i).getOrderDT("read") + "\n\n");
+            Log.e("OrderDT", orderList.get(i).getOrderDT("read") + "\n");
+            Log.e("orderGetDT", orderList.get(i).getOrderGetDT("read") + "\n\n");
         }
     }
 
