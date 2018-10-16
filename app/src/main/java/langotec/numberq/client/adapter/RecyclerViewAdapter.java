@@ -85,6 +85,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             textStoreName.setText(store.getHeadName());
             textBranchName.setText(store.getBranchName());
             store.setImageView(storeIconImage);
+            textNumber.setText(((Store) data.get(position)).getWaitingNumber()+"");
+            textMinute.setText(((Store) data.get(position)).getWaitingNumber()*5+"");
         }
 
         else if (data instanceof Cart){

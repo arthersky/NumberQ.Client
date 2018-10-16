@@ -21,8 +21,6 @@
 
     <string name="locationManager">Location Manager</string>
     <string name="locationMessage">GPS目前尚未啟用\n請問是否現在設定啟用GPS?</string>
-    <string name="setPositiveButton">On</string>
-    <string name="setNegativeButton">不啟用</string>
 
     <string name="label_loading">This Is Empty View</string>
     <string name="label_interval">Interval: </string>
@@ -98,14 +96,10 @@
     <string name="menu_waitNum">店家目前等待人數:</string>
     <string name="menu_waitTime">預計取餐時間:</string>
     <string name="menu_cartInfo">確定要放入購物車嗎?</string>
-    <string name="menu_confirm">確定</string>
-    <string name="menu_cancel">取消</string>
     <string name="menu_cartHas">購物車內已有</string>
     <string name="menu_an">筆同一間店家的</string>
     <string name="menu_addAnother">囉，系統將會合併數量，確定嗎?</string>
     <string name="menu_added">已加入購物車</string>
-    <string name="menu_added_cancel">取消</string>
-    <string name="menu_added_canceled">已取消</string>
     <string name="menu_quantity">數量:</string>
     <string name="menu_singlePrice">單價:</string>
     <string name="menu_totalPrice">總價:</string>
@@ -157,5 +151,12 @@
     </array>
     <string name="order_status">訂單目前狀態:</string>
     <string name="order_finishTime">預計取餐時間:</string>
+    <string name="setPositiveButton">ON</string>
+    <string name="setNegativeButton">OFF</string>
+    <string name="menu_confirm">OK</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_added_cancel">Cancel</string>
+    <string name="menu_added_canceled">Canceled</string>
+    <string name="search">search</string>
 
 </resources>

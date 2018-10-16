@@ -19,4 +19,13 @@
     <string name="update_record">更新</string>
     <string name="delete_record">刪除</string>
     <string name="refresh_record">刷新</string>
+    <string name="setPositiveButton">啟用</string>
+    <string name="setNegativeButton">不啟用</string>
+    <string name="menu_confirm">確定</string>
+    <string name="menu_cancel">取消</string>
+    <string name="menu_added_cancel">取消</string>
+    <string name="menu_added_canceled">已取消</string>
+    <string name="dialog_loading">讀取中</string>
+    <string name="locationManager">位置管理</string>
+    <string name="menuItem_search">搜尋</string>
 </resources>
