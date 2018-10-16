@@ -97,6 +97,7 @@
         android:text="手機"
         android:textColor="#0000ff"
         android:textSize="18dp"
+        android:inputType="phone"
         app:layout_constraintBottom_toBottomOf="@+id/textView9"
         app:layout_constraintStart_toEndOf="@+id/textView9"
         app:layout_constraintTop_toTopOf="@+id/textView9"

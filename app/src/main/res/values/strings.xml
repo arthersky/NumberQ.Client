@@ -158,5 +158,6 @@
     <string name="menu_added_cancel">Cancel</string>
     <string name="menu_added_canceled">Canceled</string>
     <string name="search">search</string>
+    <string name="order_takeOut">外帶</string>
 
 </resources>

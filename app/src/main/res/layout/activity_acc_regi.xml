@@ -162,7 +162,7 @@
         android:layout_marginEnd="33dp"
         android:layout_marginTop="22dp"
         android:hint="請輸入手機號碼"
-        android:inputType="textPhonetic"
+        android:inputType="phone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView5"
         app:layout_constraintTop_toBottomOf="@+id/etPass1" />
