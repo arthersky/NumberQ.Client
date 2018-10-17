@@ -139,7 +139,7 @@ public class MenuBaseAdapter extends BaseAdapter {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent();
-                        intent.putExtra("orderId",order.getOrderId());
+                        intent.putExtra("orderId", order.getOrderId());
                         intent.setClass(context, MakeQRcode.class);
                         context.startActivity(intent);
                     }

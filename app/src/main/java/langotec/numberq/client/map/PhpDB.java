@@ -77,6 +77,8 @@ public class PhpDB implements Runnable
     public void setPairSet(PairSet tpairSet){ pairSet = tpairSet;}
     //返回是否JSON
     public boolean isJSON(){return pairSet.isJSON();}
+    //返回是否okHTTP
+    public boolean isOkHTTP(){return pairSet.isOkHTTP();}
     //傳回自己
     public PhpDB getThis(){return this;}
 
@@ -138,11 +140,13 @@ public class PhpDB implements Runnable
         //引入php上的參數免得一大串傷眼睛 2.選擇性參數
         final String phpSQLPwd = context.getResources().getString(R.string.phpSQLPwd); //通關碼
         final String phpSQLstoreList  = context.getResources().getString(R.string.phpSQLstoreList); //商店清單
+        public final String phpSQLsetStore  = context.getResources().getString(R.string.phpSQLsetStore); //商店設定
         final String phpSQLstoreSearchByName = context.getResources().getString(R.string.phpSQLstoreSearchByName); //商店搜尋
+        final String phpSQLstoreSearchById = context.getResources().getString(R.string.phpSQLstoreSearchById); //商店搜尋2
         final String phpSQLstoreProductList = context.getResources().getString(R.string.phpSQLstoreProductList); //產品搜尋
         final String phpSQLuserList = context.getResources().getString(R.string.phpSQLuserList); //人員清單
         final String phpSQLuserSearchByEMAIL = context.getResources().getString(R.string.phpSQLuserSearchByEMAIL); //Email人員搜尋
-        final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
+        public final String phpSQLorderList = context.getResources().getString(R.string.phpSQLorderList); //訂單搜尋
         public final String phpSQLorderMSList = context.getResources().getString(R.string.phpSQLorderMSList); //完整訂單搜尋
         public final String phpSQLgetOrderNewId = context.getResources().getString(R.string.phpSQLgetOrderNewId); //訂單取號
         public final String phpSQLsetOrderUpdate = context.getResources().getString(R.string.phpSQLsetOrderUpdate); //訂單更新
@@ -177,6 +181,11 @@ public class PhpDB implements Runnable
         private String functionName="";
         //JSON格式
         private boolean blJSON  = false;
+        //使用OkHttp
+        private boolean blOkHTTP = false;
+
+        public boolean isOkHTTP() {
+            return this.blOkHTTP;}
 
         public boolean isJSON() {
             return this.blJSON;}
@@ -274,8 +283,16 @@ public class PhpDB implements Runnable
         { setPair(phpSQLPwdFunction,phpSQLPwd); }
 
         public void setPairJSON() //設定輸出JSON
-        {   this.blJSON = true;
-            setPair(phpSQLtoJSON,"1");}
+        {setPairJSON(true);}
+        public void setPairJSON(boolean btmp) //設定JSON (可移除)
+        {   this.blJSON = btmp;
+            if (btmp) setPair(phpSQLtoJSON,"1");
+            else removePair(phpSQLtoJSON);}
+
+        public void setPairOkHTTP() //設定使用OkHTTP
+        {setPairOkHTTP(true);}
+        public void setPairOkHTTP(boolean btmp) //設定使用OkHTTP
+        { this.blOkHTTP = btmp; }
 
         public void setPairDefault() //預設值
         {
@@ -324,7 +341,8 @@ public class PhpDB implements Runnable
         //private HashMap<String,Object> newItem;
         //public ArrayList<ItemListRow> getItemListSet() { return itemListSet; }
         private Handler dataHandler = null;
-        OkHttpClient okHttpClient;
+        //目前兩種連線方法都支援(?)
+        OkHttpClient okHttpClient = null;
         AndroidHttpClient androidHttpClient =null;
 
         //建構子
@@ -344,10 +362,13 @@ public class PhpDB implements Runnable
         {
             Log.e("HttpDataFromPHP","執行序執行中");
             //JSON的輸出不同
+            //檢視 JSON設定與OkHTTP設定
             if (pairSet.isJSON()) {
-                jsonArray = getJSON();
+                if (pairSet.isOkHTTP()) jsonArray = getOkJSON();
+                    else jsonArray = getJSON();
             }else {
-                itemListSet = getData(); //有點多寫的
+                if (pairSet.isOkHTTP()) itemListSet = getOkData();
+                else itemListSet = getData(); //有點多寫的
             }
             //有設定 Handler 則傳出資料
 
@@ -380,7 +401,7 @@ public class PhpDB implements Runnable
                 Log.e("getPHPOkConnection",serverURL+fileURL);
                 Log.e("getPHPOkConnection",pairSet.getAll().toString());
 
-                if (okHttpClient == null) okHttpClient = new OkHttpClient();
+                if (okHttpClient == null) okHttpClient = new OkHttpClient().newBuilder().build();;
                 FormBody.Builder builder = new FormBody.Builder();
 
                 if (pairSet.pairs.size()>0)
@@ -547,7 +568,7 @@ public class PhpDB implements Runnable
                 //取連線物件 並從連線成功的物件中處理收到的資料
                 itemListSet = getOkDate( getPHPOkConnection(""));
                 if (itemListSet.size() >0) blReady = true;
-                Log.e("getData 取得筆數",""+itemListSet.size());
+                Log.e("getOkData 取得筆數",""+itemListSet.size());
             }catch(Exception ex)
             {
                 ex.printStackTrace();
@@ -644,7 +665,7 @@ public class PhpDB implements Runnable
                 }
             }
             catch(Exception ex) {
-                Log.e("getDate","資料讀取失敗:" + ex.toString());
+                Log.e("getOkDate","資料讀取失敗:" + ex.toString());
                 response.body().close();
                 okHttpClient = null;
             }

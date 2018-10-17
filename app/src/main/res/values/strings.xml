@@ -62,6 +62,8 @@
     <string name="phpSQLsetOrderSub">setOrderSub</string>
     <string name="phpSQLdelOrderSub">delOrderSub</string>
     <string name="phpSQLtoJSON">json</string>
+    <string name="phpSQLsetStore">setStore</string>
+    <string name="phpSQLstoreSearchById">storeSearchById</string>
 
     phpSQLnewOrderSub
     phpSQLnewOrderSub
@@ -158,5 +160,7 @@
     <string name="order_status">訂單目前狀態:</string>
     <string name="order_finishTime">預計取餐時間:</string>
     <string name="order_takeOut">外帶</string>
+    <string name="order_scanSuccess">掃描成功</string>
+    <string name="order_finish">已可以取餐，謝謝您</string>
 
 </resources>
