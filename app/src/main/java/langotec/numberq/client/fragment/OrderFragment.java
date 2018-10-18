@@ -193,7 +193,7 @@ public class OrderFragment extends Fragment {
                         break;
                     }
                 }
-                if (flag || payCheck == 4)
+                if (flag || payCheck == 0 || payCheck == 4)
                     continue;
                 String headName = jsObj.optString("HeadName");
                 String branchName = jsObj.optString("BranchName");
