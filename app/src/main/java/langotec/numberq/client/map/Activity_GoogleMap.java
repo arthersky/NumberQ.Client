@@ -165,7 +165,7 @@ public class Activity_GoogleMap extends AppCompatActivity implements SearchView.
             bLoc = true;
             Log.e("onCreate","執行上一頁傳來搜尋特定店家命令");
             functionWork = FUNCTION_STORESEARCH;
-            refresh_Record(10, FUNCTION_STORESEARCH, false,bundle.getString("storeName"));
+            refresh_Record(10, FUNCTION_STORESEARCH, true, bundle.getString("storeName"));
         }
         else{
             fab.setEnabled(false);
