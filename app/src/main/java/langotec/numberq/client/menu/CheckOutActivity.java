@@ -239,6 +239,7 @@ public class CheckOutActivity extends AppCompatActivity {
     public static void getOrderID() {
         db.getPairSet().setPairFunction(db.pairSet.phpSQLgetOrderNewId); //取新訂單
         db.getPairSet().setPairSearch(1, member.getCustomerUserId());
+        db.getPairSet().setPairOkHTTP();
         Log.e("批次新增訂單開始時間:", new Date().toString());
         Log.e("會員編號", member.getCustomerUserId() + "");
         new Thread(db).start();
@@ -252,6 +253,7 @@ public class CheckOutActivity extends AppCompatActivity {
         for (int i = 0; i < orderList.size(); i++) {
             for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
                 db = new PhpDB(weakReference, new OrderHandler());
+                db.getPairSet().setPairOkHTTP();
                 //新增訂單內部份資料
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLsetOrderUpdate);
                 //OrderID
@@ -271,7 +273,7 @@ public class CheckOutActivity extends AppCompatActivity {
                 db.getPairSet().setPairSearch(11, String.valueOf(orderList.get(i).getTotalPrice()));
                 //orderGetDT(finishTime)
                 db.getPairSet().setPairSearch(14,
-                        orderList.get(orderIndex).getOrderGetDT("whatever"));
+                        orderList.get(i).getOrderGetDT("whatever"));
                 Log.e("批次新增第" + i + "筆訂單資料，開始時間", new Date().toString());
                 new Thread(db).start();
             }
@@ -283,6 +285,7 @@ public class CheckOutActivity extends AppCompatActivity {
         for (int i = 0; i < orderList.size(); i++) {
             for (int i2 = 0; i2 < orderList.get(i).getMenuList().size(); i2++) {
                 db = new PhpDB(weakReference, new OrderHandler());
+                db.getPairSet().setPairOkHTTP();
                 //訂單菜單新增
                 db.getPairSet().setPairFunction(db.pairSet.phpSQLnewOrderSub);
                 //OrderID
@@ -298,6 +301,19 @@ public class CheckOutActivity extends AppCompatActivity {
                 Log.e("批次新增第" + i + "筆菜單，開始時間", new Date().toString());
                 new Thread(db).start();
             }
+        }
+    }
+
+    public static void setBranchDetail(){
+        for (int i = 0; i < orderList.size(); i++){
+            db = new PhpDB(weakReference, new OrderHandler());
+            db.getPairSet().setPairFunction(db.pairSet.phpSQLsetStore); //商店設定
+            db.getPairSet().setPairOkHTTP();
+            db.getPairSet().setPairSearch(1, orderList.get(i).getBranchId()); //BranchId
+            db.getPairSet().setPairSearch(10,"10"); //waitNumber
+            db.getPairSet().setPairSearch(11, new Date(System.currentTimeMillis()).toString()); //waitDT
+            Log.e("批次新增第" + i + "筆分店資料，開始時間", new Date().toString());
+            new Thread(db).start();
         }
     }
 
@@ -353,11 +369,10 @@ public class CheckOutActivity extends AppCompatActivity {
                         }
                     }
                 }
+            }else {
+                Log.e("db.getState()", db.getState() + "");
+                createOrderFailure("db.getState() != true");
             }
-//            else {
-//                Log.e("db.getState()", db.getState() + "");
-//                createOrderFailure("db.getState() != true");
-//            }
             //批次新增訂單
             if (tmpDB.getPairFunction().equals(tmpDB.getPairSet().phpSQLgetOrderNewId) &&
                     orderIndex < orderList.size() - 1) {

@@ -1,15 +1,12 @@
 package langotec.numberq.client.fragment;
 
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,16 +25,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
-import langotec.numberq.client.MainActivity;
 import langotec.numberq.client.R;
 import langotec.numberq.client.dbConnect.parseJSON;
-import langotec.numberq.client.login.LoginActivity;
 import langotec.numberq.client.map.PhpDB;
 import langotec.numberq.client.login.Member;
-import langotec.numberq.client.menu.CheckOutActivity;
 import langotec.numberq.client.menu.MenuBaseAdapter;
 import langotec.numberq.client.menu.Order;
 
@@ -58,12 +50,15 @@ public class OrderFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        orderList = null;
         weakReference = new WeakReference<>(getContext());
         orderHandler = new OrderHandler();
         member = findMemberFile();
         setHasOptionsMenu(true);
-        queryOrder();
-
+        if (savedInstanceState == null)
+            queryOrder();
+        else
+            orderList = (ArrayList<Order>) savedInstanceState.getSerializable("orderList");
     }
 
     @Override
@@ -94,6 +89,12 @@ public class OrderFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("orderList", orderList);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         orderHandler.removeCallbacksAndMessages(null);
@@ -114,9 +115,8 @@ public class OrderFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.order_refresh:
-                orderList = null;
                 queryOrder();
-                refreshOrder();
+                refreshOrderFragment();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -139,8 +139,10 @@ public class OrderFragment extends Fragment {
         return new parseJSON(json, member).parse();
     }
 
-    private void queryOrder(){
+    public static void queryOrder(){
+        orderList = null;
         phpDB = new PhpDB(weakReference, orderHandler);
+        phpDB.getPairSet().setPairOkHTTP();
         phpDB.getPairSet().setPairFunction(phpDB.pairSet.phpSQLorderMSList); //查詢完整定單資料
         phpDB.getPairSet().setPairSearch(2, member.getCustomerUserId()); //使用者ID查詢
         phpDB.getPairSet().setPairJSON();
@@ -156,15 +158,13 @@ public class OrderFragment extends Fragment {
             if (phpDB.getState()) {
                 Log.e("資料回應時間", new Date().toString());
                 Log.e("回應副程式", phpDB.getPairFunction());
-                if (phpDB.getPairFunction().equals(phpDB.getPairSet().phpSQLorderMSList)) {
-                    parseOrderJSON(phpDB.getJSONData());
-                }
+                parseOrderJSON(phpDB.getJSONData());
             }
-            refreshOrder();
+            refreshOrderFragment();
         }
     }
 
-    public static void refreshOrder(){
+    public static void refreshOrderFragment(){
         Fragment fragment = OrderFragment.orderFragment;
         if (fragment.isResumed()) {
             fragment.getFragmentManager().beginTransaction().detach(fragment)
@@ -182,7 +182,7 @@ public class OrderFragment extends Fragment {
                 String productName = jsObj.optString("productName");
                 String quantity = jsObj.optString("quantity");
                 String sumPrice = jsObj.optString("sumprice");
-
+                int payCheck = Integer.parseInt(jsObj.optString("payCheck"));
                 for (int i2 = 0; i2 < orderList.size(); i2++){
                     Order indexOrder = orderList.get(i2);
                     if (indexOrder.getOrderId().equals(orderId)){
@@ -193,7 +193,7 @@ public class OrderFragment extends Fragment {
                         break;
                     }
                 }
-                if (flag)
+                if (flag || payCheck == 4)
                     continue;
                 String headName = jsObj.optString("HeadName");
                 String branchName = jsObj.optString("BranchName");
@@ -206,10 +206,8 @@ public class OrderFragment extends Fragment {
                 String deliveryAddress = jsObj.optString("deliveryAddress");
                 String taxId = jsObj.optString("taxId");
                 String payWay = jsObj.optString("payWay");
-                int payCheck = Integer.parseInt(jsObj.optString("payCheck"));
                 int totalPrice = Integer.parseInt(jsObj.optString("totalPrice"));
                 String comment = jsObj.optString("comment");
-//                String userName = jsObj.getString("userName");
                 String orderDT = jsObj.optString("orderDT");
                 String orderGetDT = jsObj.optString("orderGetDT");
                 Order order = new Order(
@@ -226,7 +224,6 @@ public class OrderFragment extends Fragment {
                 Log.e("JSON ERROR", e.toString());
             }
         }
-
         Log.e("orderlist","order List size:" + orderList.size());
     }
 }
